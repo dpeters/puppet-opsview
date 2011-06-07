@@ -6,9 +6,9 @@ requests to a given Opsview server.  You will need to create
 /etc/puppet/opsview.conf with the following format on each client that you wish
 to connect with an Opsview server:
 
-url: http://foo/bar
-username: foobar
-password: foobaz
+    url: http://foo/bar
+    username: foobar
+    password: foobaz
 
 The libraries are heavily based off of the original Opsview libraries, with
 contributions by Devon Peters.
@@ -42,6 +42,6 @@ in util/ instead.
 Authors
 -------
 
-Devon Peters (original author of every other provider library except for
+* Devon Peters (original author of every other provider library except for
 opsview_monitored.rb)
-Christian Paredes <christian.paredes@sbri.org>
+* Christian Paredes <christian.paredes@sbri.org>
