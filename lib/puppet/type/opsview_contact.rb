@@ -1,4 +1,4 @@
-Puppet::Type.newtype(:opsviewcontact) do
+Puppet::Type.newtype(:opsview_contact) do
   @doc = "Manages contacts in an Opsview monitoring system"
 
   ensurable
