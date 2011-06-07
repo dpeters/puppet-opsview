@@ -31,19 +31,20 @@ require 'puppet'
 # Config file parsing
 require 'yaml'
 
-Puppet::Type.type(:opsviewmonitored).provide :ruby, :parent => Puppet::Provider do
-  @@loginPath = "login"
+Puppet::Type.type(:opsviewmonitored).provide :ruby, :parent => Puppet::Provider::Opsview do
   @@hostConfigPath = "config/host"
   @@reloadPath = "reload"
-  @@authToken = nil
 
   mk_resource_methods
 
   # Query the current resource state from Opsview
   def self.prefetch(resources)
-    self.instances.each do |provider|
-      if node = resources[provider.name] # and node[:name] == provider[:name]
-        node.provider = provider
+    resources.each do |name, resource|
+      if result = get 'node', name
+        result[:ensure] = :present
+        resource.provider = new(result)
+      else
+        resource.provider = new(:ensure => :absent)
       end
     end
   end
@@ -51,16 +52,15 @@ Puppet::Type.type(:opsviewmonitored).provide :ruby, :parent => Puppet::Provider 
   def self.instances
     providers = []
 
-    # Retrieve all nodes from Opsview :/  Might need to filter this in future -
-    # 1000 nodes would be a big config to retrieve (and store in memory)...
-    nodeData = getNodeData
+    # Retrieve all nodes.  Expensive query.
+    nodes = get 'node'
 
-    nodeData["list"].each do |node|
+    nodes["list"].each do |node|
       p = new(:name => node["name"],
               :ip => node["ip"],
               :hostgroup => node["hostgroup"]["name"],
               :hosttemplates => node["hosttemplates"].collect{ |ht| ht["name"] },
-              :fullJson => node,
+              :full_json => node,
               :ensure => :present)
       providers << p
     end
@@ -87,10 +87,10 @@ Puppet::Type.type(:opsviewmonitored).provide :ruby, :parent => Puppet::Provider 
 
   # Apply the changes to Opsview
   def flush
-    if @nodeJson
-      @updatedJson = @nodeJson.dup
+    if @node_json
+      @updated_json = @node_json.dup
     else
-      @updatedJson = getDefaultNodeJson
+      @updated_json = default_node
     end
  
     @property_hash.delete(:groups)
@@ -99,41 +99,19 @@ Puppet::Type.type(:opsviewmonitored).provide :ruby, :parent => Puppet::Provider 
     # Update the node's JSON values based on any new params.  Sadly due to the
     # structure of the JSON vs the flat nature of the puppet properties, this
     # is a bit of a manual task.
-    @updatedJson["hostgroup"]["name"] = @property_hash[:hostgroup]
-    @updatedJson["name"] = @resource[:name]
-    @updatedJson["ip"] = @property_hash[:ip]
+    @updated_json["hostgroup"]["name"] = @property_hash[:hostgroup]
+    @updated_json["name"] = @resource[:name]
+    @updated_json["ip"] = @property_hash[:ip]
   
-    @updatedJson["hosttemplates"] = []
+    @updated_json["hosttemplates"] = []
     if @property_hash[:hosttemplates]
       @property_hash[:hosttemplates].each do |ht|
-        @updatedJson["hosttemplates"] << {:name => ht}
+        @updated_json["hosttemplates"] << {:name => ht}
       end
     end
   
-    # Update the Opsview configuration with the new node configuration
-    # TODO: Abstract these GET/POST calls - DRY.
-    urlStr = [@@config["url"], @@hostConfigPath].join("/")
-    url = URI.parse(urlStr)
-  
-    req = Net::HTTP::Put.new(url.path)
-    req["X-Opsview-Username"] = @@config["username"]
-    req["X-Opsview-Token"] = @@authToken
-    req["Content-Type"] = "application/json"
-    req.body = @updatedJson.to_json
- 
-    begin
-      res = Net::HTTP::new(url.host, url.port).start {|http| http.request(req) }
-    rescue
-      raise "Error communicating with Opsview: " + $!
-    end
-  
-    begin
-      responseJson = JSON.parse(res.body)
-      reloadOpsview
-    rescue
-      raise "Could not parse the JSON response from Opsview: #{res.body}"
-    end
-  
+    put 'node', @updated_json.to_json
+
     @property_hash.clear
     @node_properties.clear
 
@@ -144,8 +122,8 @@ Puppet::Type.type(:opsviewmonitored).provide :ruby, :parent => Puppet::Provider 
     super
 
     # Save the JSON for the node if it's present in the arguments
-    if args[0].class == Hash and args[0].has_key?(:fullJson)
-      @nodeJson = args[0][:fullJson]
+    if args[0].class == Hash and args[0].has_key?(:full_json)
+      @node_json = args[0][:full_json]
     end
 
     @property_hash = @property_hash.inject({}) do |result, ary|
@@ -191,93 +169,8 @@ Puppet::Type.type(:opsviewmonitored).provide :ruby, :parent => Puppet::Provider 
     @property_hash.dup
   end
 
-
-  # Get an authentication token from Opsview, ready for further API calls
-  def self.getToken
-    config_file = "/etc/puppet/opsview.conf"
-
-    # Load the Opsview config
-    begin
-      @@config = YAML.load_file(config_file)
-    rescue
-      raise(Puppet::DevError, "Could not parse YAML configuration file " + config_file + " " + $!)
-    end
-
-    if @@config["username"].nil? or @@config["password"].nil? or @@config["url"].nil?
-      raise(Puppet::DevError, "Config file must contain url, username and password fields.")
-    end
-
-    url = URI.parse([@@config["url"], @@loginPath].join("/"))
-
-    req = Net::HTTP::Post.new(url.path)
-    req.body = { "username" => @@config["username"],
-                 "password" => @@config["password"] }.to_json
-    req["Content-Type"] = "application/json"
-
-    begin
-      res = Net::HTTP::new(url.host, url.port).start {|http| http.request(req) }
-    rescue
-      raise "Error communicating with Opsview: " + $!
-    end
-
-    case res
-      when Net::HTTPSuccess, Net::HTTPRedirection
-        # OK
-        responseJson = JSON.parse(res.body)
-        @@authToken = responseJson["token"]
-      else
-        raise "Unexpected token response from Opsview: " + res.body
-      end
-  end
-
-  def self.getNodeData
-    getToken unless @@authToken
-
-    urlStr = [@@config["url"], @@hostConfigPath].join("/")
-    url = URI.parse(urlStr)
-
-    req = Net::HTTP::Get.new(url.path)
-    req["X-Opsview-Username"] = @@config["username"]
-    req["X-Opsview-Token"] = @@authToken
-    req["Content-Type"] = "application/json"
-
-    begin
-      res = Net::HTTP::new(url.host, url.port).start {|http| http.request(req) }
-    rescue
-      raise "Error communicating with Opsview: " + $!
-    end
-
-    begin
-      responseJson = JSON.parse(res.body)
-    rescue
-      raise "Could not parse the JSON response from Opsview: #{res.body}"
-    end
-    responseJson
-  end
-
-  def reloadOpsview
-    getToken unless @@authToken
-
-    urlStr = [@@config["url"], @@reloadPath].join("/")
-    url = URI.parse(urlStr)
-
-    req = Net::HTTP::Post.new(url.path)
-    req["X-Opsview-Username"] = @@config["username"]
-    req["X-Opsview-Token"] = @@authToken
-    req["Content-Type"] = "application/json"
-    req["Accept"] = "application/json"
-
-    begin
-      res = Net::HTTP::new(url.host, url.port).start {|http| http.request(req) }
-    rescue
-      raise "Error communicating with Opsview: " + $!
-    end
-
-    # TODO: Check for a 200 to indicate a successful reload
-  end
-
-  def getDefaultNodeJson
-    jsonText = '
+  def default_node
+    json = '
      {
        "flap_detection_enabled" : "1",
        "snmpv3_privprotocol" : null,
@@ -332,6 +225,6 @@ Puppet::Type.type(:opsviewmonitored).provide :ruby, :parent => Puppet::Provider 
        "other_addresses" : ""
      }'
 
-    JSON.parse(jsonText.to_s)
+    JSON.parse(json.to_s)
   end
 end
