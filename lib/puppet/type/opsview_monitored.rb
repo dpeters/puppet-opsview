@@ -1,4 +1,4 @@
-Puppet::Type.newtype(:opsviewmonitored) do
+Puppet::Type.newtype(:opsview_monitored) do
   @doc = "Monitors the node from an Opsview monitoring system"
 
   ensurable
@@ -6,7 +6,7 @@ Puppet::Type.newtype(:opsviewmonitored) do
   newparam(:name, :namevar => true) do
   end
 
-  newparam(:reloadopsview) do
+  newparam(:reload_opsview) do
     desc "True if you want an Opsview reload to be performed when the host is updated"
   end
 
