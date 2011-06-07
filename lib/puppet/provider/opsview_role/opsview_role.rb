@@ -43,7 +43,7 @@ Puppet::Type.type(:opsview_role).provide :opsview, :parent => Puppet::Provider::
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get 'role', name
+      if result = get('role', name)
         result[:ensure] = :present
         resource.provider = new(result)
       else

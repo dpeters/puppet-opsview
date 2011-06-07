@@ -42,7 +42,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get 'node', name
+      if result = get('node', name)
         result[:ensure] = :present
         resource.provider = new(result)
       else

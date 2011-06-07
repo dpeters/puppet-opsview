@@ -43,7 +43,7 @@ Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Pr
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get 'hosttemplate', name
+      if result = get('hosttemplate', name)
         result[:ensure] = :present
         resource.provider = new(result)
       else

@@ -43,7 +43,7 @@ Puppet::Type.type(:opsview_hostgroup).provide :opsview, :parent => Puppet::Provi
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get 'hostgroup', name
+      if result = get('hostgroup', name)
         result[:ensure] = :present
         resource.provider = new(result)
       else
