@@ -47,26 +47,27 @@ class Puppet::Provider::Opsview < Puppet::Provider
   end
 
   def self.token
-    unless @@token
-      post_body = { "username" => config["username"],
-                    "password" => config["password"] }.to_json
+    @@token ||= get_token
+  end
 
-      begin
-        response = RestClient.post url('login'), post_body, :content_type => :json
-      rescue
-        raise "Error communicating with Opsview: " + $!
-      end
+  def self.get_token
+    post_body = { "username" => config["username"],
+                  "password" => config["password"] }.to_json
 
-      case response.code
-      when 200
-        Puppet.debug "Response code: 200"
-      else
-        raise "Was not able to login to Opsview to grab the token."
-      end
-
-      @@token = JSON.parse(response)['token']
+    begin
+      response = RestClient.post url('login'), post_body, :content_type => :json
+    rescue
+      raise "Error communicating with Opsview: " + $!
     end
-    @@token
+
+    case response.code
+    when 200
+      Puppet.debug "Response code: 200"
+    else
+      raise "Was not able to login to Opsview to grab the token."
+    end
+
+    @@token = JSON.parse(response)['token']
   end
 
   def self.reload_opsview
