@@ -43,12 +43,26 @@ Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Pr
 
   mk_resource_methods
 
+  def self.hosttemplate_map(hosttemplate)
+    p = { :name          => hosttemplate["name"],
+          :hosttemplate  => hosttemplate["name"],
+          :description   => hosttemplate["description"],
+          :servicechecks => hosttemplate["servicechecks"].collect { |sc| sc["name"] },
+          :full_json     => hosttemplate,
+          :ensure        => :present }
+
+    # optional properties
+    if defined? hosttemplate["managementurls"]
+      p[:managementurls] = hosttemplate["managementurls"].collect { |mu| mu["name"] }
+    end
+    p
+  end
+
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get_resource(name)
-        result[:ensure] = :present
-        resource.provider = new(result)
+      if hosttemplate = get_resource(name)
+        resource.provider = new(hosttemplate_map(hosttemplate))
       else
         resource.provider = new(:ensure => :absent)
       end
@@ -61,19 +75,8 @@ Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Pr
     # Retrieve all hosttemplates.  Expensive query.
     hosttemplates = get_resources
 
-    hosttemplates["list"].each do |hosttemplate|
-      p = { :name          => hosttemplate["name"],
-            :hosttemplate  => hosttemplate["name"],
-            :description   => hosttemplate["description"],
-            :servicechecks => hosttemplate["servicechecks"].collect { |sc| sc["name"] },
-            :full_json     => hosttemplate,
-            :ensure        => :present }
-
-      # optional properties
-      if defined? hosttemplate["managementurls"]
-        p[:managementurls] = hosttemplate["managementurls"].collect { |mu| mu["name"] }
-      end
-      providers << new(p)
+    hosttemplates.each do |hosttemplate|
+      providers << new(hosttemplate_map(hosttemplate))
     end
 
     providers

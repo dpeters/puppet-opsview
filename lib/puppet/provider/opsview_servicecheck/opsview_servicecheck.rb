@@ -43,12 +43,37 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
 
   mk_resource_methods
 
+  def self.servicecheck_map(servicecheck)
+    p = { :name         => servicecheck["name"],
+          :description  => servicecheck["description"],
+          :servicegroup => servicecheck["servicegroup"]["name"],
+          :args         => servicecheck["args"],
+          :full_json    => servicecheck,
+          :ensure       => :present }
+    # optional properties
+    if defined? servicecheck["plugin"]["name"]
+      p[:plugin] = servicecheck["plugin"]["name"]
+    end
+    if defined? servicecheck["dependencies"]
+      p[:dependencies] = servicecheck["dependencies"].collect{ |dp| dp["name"] }
+    end
+    if defined? servicecheck["check_period"]["name"]
+      p[:check_period] = servicecheck["check_period"]["name"]
+    end
+    [:check_interval, :check_attempts, :retry_check_interval,
+     :invertresults, :notification_options, :notification_period,
+     :notification_interval, :flap_detection_enabled
+    ].each do |prop|
+      p[prop] = servicecheck[prop.id2name] if defined? servicecheck[prop.id2name]
+    end
+    p
+  end
+
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get_resource(name)
-        result[:ensure] = :present
-        resource.provider = new(result)
+      if servicecheck = get_resource(name)
+        resource.provider = new(servicecheck_map(servicecheck))
       else
         resource.provider = new(:ensure => :absent)
       end
@@ -61,31 +86,8 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
     # Retrieve all servicechecks.  Expensive query.
     servicechecks = get_resources
 
-    servicechecks["list"].each do |servicecheck|
-      p = { :name         => servicecheck["name"],
-            :description  => servicecheck["description"],
-            :servicegroup => servicecheck["servicegroup"]["name"],
-            :args         => servicecheck["args"],
-            :full_json    => servicecheck,
-            :ensure       => :present }
-      # optional properties
-      if defined? servicecheck["plugin"]["name"]
-        p[:plugin] = servicecheck["plugin"]["name"]
-      end
-      if defined? servicecheck["dependencies"]
-        p[:dependencies] = servicecheck["dependencies"].collect{ |dp| dp["name"] }
-      end
-      if defined? servicecheck["check_period"]["name"]
-        p[:check_period] = servicecheck["check_period"]["name"]
-      end
-      [:check_interval, :check_attempts, :retry_check_interval,
-       :invertresults, :notification_options, :notification_period,
-       :notification_interval, :flap_detection_enabled
-      ].each do |prop|
-        p[prop] = servicecheck[prop.id2name] if defined? servicecheck[prop.id2name]
-      end
-
-      providers << new(p)
+    servicechecks.each do |servicecheck|
+      providers << new(servicecheck_map(servicecheck))
     end
 
     providers

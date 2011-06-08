@@ -43,12 +43,25 @@ Puppet::Type.type(:opsview_hostgroup).provide :opsview, :parent => Puppet::Provi
 
   mk_resource_methods
 
+  def self.hostgroup_map(hostgroup)
+    p = { :name      => hostgroup["name"],
+          :hostgroup => hostgroup["name"],
+          :full_json => hostgroup,
+          :ensure    => :present }
+
+    # optional properties
+    if defined? hostgroup["parent"]["name"]
+      p[:parent] = hostgroup["parent"]["name"]
+    end
+
+    p
+  end
+
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get_resource(name)
-        result[:ensure] = :present
-        resource.provider = new(result)
+      if hostgroup = get_resource(name)
+        resource.provider = new(hostgroup_map(hostgroup))
       else
         resource.provider = new(:ensure => :absent)
       end
@@ -61,17 +74,8 @@ Puppet::Type.type(:opsview_hostgroup).provide :opsview, :parent => Puppet::Provi
     # Retrieve all hostgroups.  Expensive query.
     hostgroups = get_resources
 
-    hostgroups["list"].each do |hostgroup|
-      p = { :name      => hostgroup["name"],
-            :hostgroup => hostgroup["name"],
-            :full_json => hostgroup,
-            :ensure    => :present }
-
-      # optional properties
-      if defined? hostgroup["parent"]["name"]
-        p[:parent] = hostgroup["parent"]["name"]
-      end
-      providers << new(p)
+    hostgroups.each do |hostgroup|
+      providers << new(hostgroup_map(hostgroup))
     end
 
     providers

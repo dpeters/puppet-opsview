@@ -42,12 +42,21 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
 
   mk_resource_methods
 
+  def self.node_map(node)
+    p = { :name          => node["name"],
+          :ip            => node["ip"],
+          :hostgroup     => node["hostgroup"]["name"],
+          :hosttemplates => node["hosttemplates"].collect{ |ht| ht["name"] },
+          :full_json     => node,
+          :ensure        => :present }
+    p
+  end
+
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get_resource(name)
-        result[:ensure] = :present
-        resource.provider = new(result)
+      if node = get_resource(name)
+        resource.provider = new(node_map(node))
       else
         resource.provider = new(:ensure => :absent)
       end
@@ -60,14 +69,8 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     # Retrieve all nodes.  Expensive query.
     nodes = get_resources
 
-    nodes["list"].each do |node|
-      p = { :name => node["name"],
-            :ip => node["ip"],
-            :hostgroup => node["hostgroup"]["name"],
-            :hosttemplates => node["hosttemplates"].collect{ |ht| ht["name"] },
-            :full_json => node,
-            :ensure => :present }
-      providers << new(p)
+    nodes.each do |node|
+      providers << new(node_map(node))
     end
 
     providers

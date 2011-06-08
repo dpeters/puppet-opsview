@@ -43,12 +43,40 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
 
   mk_resource_methods
 
+  def self.contact_map(contact)
+    p = { :name      => contact["name"],
+          :full_json => contact,
+          :ensure    => :present }
+
+      # optional properties
+    [:fullname, :description, :encrypted_password, :language].each do |prop|
+      p[prop] = contact[prop.id2name] if defined? contact[prop.id2name]
+    end
+
+    contact["variables"].each do |variable|
+      if variable["name"] == "EMAIL"
+        p[:email] = variable["value"]
+      end
+    end
+    if defined? contact["notificationprofiles"]
+      contact["notificationprofiles"].each do |profile|
+        if profile["name"] == "8x5"
+          p[:hostgroups8x5] = profile["hostgroups"].collect{ |hg| hg["name"] }
+          p[:allhostgroups8x5] = profile["all_hostgroups"]
+        elsif profile["name"] == "24x7"
+          p[:hostgroups24x7] = profile["hostgroups"].collect{ |hg| hg["name"] }
+          p[:allhostgroups24x7] = profile["all_hostgroups"]
+        end
+      end
+    end
+    p
+  end
+
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get_resource(name)
-        result[:ensure] = :present
-        resource.provider = new(result)
+      if contact = get_resource(name)
+        resource.provider = new(contact_map(contact))
       else
         resource.provider = new(:ensure => :absent)
       end
@@ -61,33 +89,8 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
     # Retrieve all contacts.  Expensive query.
     contacts = get_resources
 
-    contacts["list"].each do |contact|
-      p = { :name      => contact["name"],
-            :full_json => contact,
-            :ensure    => :present }
-
-      # optional properties
-      [:fullname, :description, :encrypted_password, :language].each do |prop|
-        p[prop] = contact[prop.id2name] if defined? contact[prop.id2name]
-      end
-
-      contact["variables"].each do |variable|
-        if variable["name"] == "EMAIL"
-          p[:email] = variable["value"]
-        end
-      end
-      if defined? contact["notificationprofiles"]
-        contact["notificationprofiles"].each do |profile|
-          if profile["name"] == "8x5"
-            p[:hostgroups8x5] = profile["hostgroups"].collect{ |hg| hg["name"] }
-            p[:allhostgroups8x5] = profile["all_hostgroups"]
-          elsif profile["name"] == "24x7"
-            p[:hostgroups24x7] = profile["hostgroups"].collect{ |hg| hg["name"] }
-            p[:allhostgroups24x7] = profile["all_hostgroups"]
-          end
-        end
-      end
-      providers << new(p)
+    contacts.each do |contact|
+      providers << new(contact_map(contact))
     end
 
     providers

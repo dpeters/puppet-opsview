@@ -43,12 +43,32 @@ Puppet::Type.type(:opsview_role).provide :opsview, :parent => Puppet::Provider::
 
   mk_resource_methods
 
+  def self.role_map(role)
+    p = { :name      => role["name"],
+          :role      => role["name"],
+          :full_json => role,
+          :ensure    => :present }
+
+    [:description, :all_hostgroups,
+     :all_servicegroups, :all_keywords].each do |property|
+      if defined? role[property.id2name]
+        p[property] = role[property.id2name]
+        end
+      end
+    [:access_hostgroups, :access_servicegroups, :access_keywords, :accesses,
+     :hostgroups].each do |property|
+      if defined? role[property.id2name]
+        p[property] = role[property.id2name].collect { |item| item["name"] }
+      end
+    end
+    p
+  end
+
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get_resource(name)
-        result[:ensure] = :present
-        resource.provider = new(result)
+      if role = get_resource(name)
+        resource.provider = new(role_map(result))
       else
         resource.provider = new(:ensure => :absent)
       end
@@ -61,26 +81,8 @@ Puppet::Type.type(:opsview_role).provide :opsview, :parent => Puppet::Provider::
     # Retrieve all roles.  Expensive query.
     roles = get_resources
 
-    roles["list"].each do |role|
-      p = { :name      => role["name"],
-            :role      => role["name"],
-            :full_json => role,
-            :ensure    => :present }
-
-      [:description, :all_hostgroups, :all_servicegroups,
-       :all_keywords].each do |property|
-        if defined? role[property.id2name]
-          p[property] = role[property.id2name]
-        end
-      end
-      [:access_hostgroups, :access_servicegroups, :access_keywords, :accesses,
-       :hostgroups].each do |property|
-        if defined? role[property.id2name]
-          p[property] = role[property.id2name].collect { |item| item["name"] }
-        end
-      end
-      
-      providers << new(p)
+    roles.each do |role|
+      providers << new(role_map(role))
     end
 
     providers

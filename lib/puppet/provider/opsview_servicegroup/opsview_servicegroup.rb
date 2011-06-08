@@ -43,12 +43,20 @@ Puppet::Type.type(:opsview_servicegroup).provide :opsview, :parent => Puppet::Pr
 
   mk_resource_methods
 
+  def servicegroup_map(servicegroup)
+    p = { :name         => servicegroup["name"],
+          :servicegroup => servicegroup["servicegroup"]["name"],
+          :full_json    => servicegroup,
+          :ensure       => :present }
+
+    p
+  end
+
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get_resource(name)
-        result[:ensure] = :present
-        resource.provider = new(result)
+      if servicegroup = get_resource(name)
+        resource.provider = new(servicegroup_map(servicegroup))
       else
         resource.provider = new(:ensure => :absent)
       end
@@ -61,13 +69,8 @@ Puppet::Type.type(:opsview_servicegroup).provide :opsview, :parent => Puppet::Pr
     # Retrieve all servicegroups.  Expensive query.
     servicegroups = get_resources
 
-    servicegroups["list"].each do |servicecheck|
-      p = { :name         => servicegroup["name"],
-            :servicegroup => servicegroup["servicegroup"]["name"],
-            :full_json    => servicegroup,
-            :ensure       => :present }
-
-      providers << new(p)
+    servicegroups.each do |servicegroup|
+      providers << new(servicegroup_map(servicegroup))
     end
 
     providers

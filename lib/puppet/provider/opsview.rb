@@ -137,7 +137,9 @@ class Puppet::Provider::Opsview < Puppet::Provider
       raise "Could not parse the JSON response from Opsview: " + response
     end
 
-    responseJson
+    obj = responseJson['list'][0]
+
+    obj
   end
 
   def self.get_resources
@@ -155,6 +157,8 @@ class Puppet::Provider::Opsview < Puppet::Provider
       raise "Could not parse the JSON response from Opsview: " + response
     end
 
-    responseJson
+    objs = responseJson["list"]
+
+    objs
   end
 end
