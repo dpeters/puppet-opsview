@@ -76,23 +76,6 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     providers
   end
 
-  def create
-    @property_hash[:ensure] = :present
-    self.class.resource_type.validproperties.each do |property|
-      if val = resource.should(property)
-        @property_hash[property] = val
-      end
-    end
-  end
-
-  def delete
-    @property_hash[:ensure] = :absent
-  end
-
-  def exists?
-    @property_hash[:ensure] != :absent
-  end
-
   # Apply the changes to Opsview
   def flush
     if @node_json

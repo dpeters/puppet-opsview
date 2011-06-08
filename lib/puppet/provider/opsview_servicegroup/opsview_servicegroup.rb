@@ -43,9 +43,9 @@ Puppet::Type.type(:opsview_servicegroup).provide :opsview, :parent => Puppet::Pr
 
   mk_resource_methods
 
-  def servicegroup_map(servicegroup)
+  def self.servicegroup_map(servicegroup)
     p = { :name         => servicegroup["name"],
-          :servicegroup => servicegroup["servicegroup"]["name"],
+          :servicegroup => servicegroup["name"],
           :full_json    => servicegroup,
           :ensure       => :present }
 
@@ -76,23 +76,6 @@ Puppet::Type.type(:opsview_servicegroup).provide :opsview, :parent => Puppet::Pr
     providers
   end
 
-  def create
-    @property_hash[:ensure] = :present
-    self.class.resource_type.validproperties.each do |property|
-      if val = resource.should(property)
-        @property_hash[property] = val
-      end
-    end
-  end
-
-  def delete
-    @property_hash[:ensure] = :absent
-  end
-
-  def exists?
-    @property_hash[:ensure] != :absent
-  end
-
   # Apply the changes to Opsview
   def flush
     if @servicegroup_json
@@ -107,7 +90,7 @@ Puppet::Type.type(:opsview_servicegroup).provide :opsview, :parent => Puppet::Pr
     @updated_json["name"] = @resource[:name]
   
     # Flush changes:
-    put 'servicegroup', @updated_json.to_json
+    put @updated_json.to_json
 
     @property_hash.clear
     @servicegroup_properties.clear

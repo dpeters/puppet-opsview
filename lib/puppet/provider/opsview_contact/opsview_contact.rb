@@ -96,23 +96,6 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
     providers
   end
 
-  def create
-    @property_hash[:ensure] = :present
-    self.class.resource_type.validproperties.each do |property|
-      if val = resource.should(property)
-        @property_hash[property] = val
-      end
-    end
-  end
-
-  def delete
-    @property_hash[:ensure] = :absent
-  end
-
-  def exists?
-    @property_hash[:ensure] != :absent
-  end
-
   # Apply the changes to Opsview
   def flush
     if @contact_json
@@ -147,7 +130,7 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
     update_notificationprofiles
   
     # Flush changes:
-    put 'contact', @updated_json.to_json
+    put @updated_json.to_json
 
     @property_hash.clear
     @contact_properties.clear

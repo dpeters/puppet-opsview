@@ -82,23 +82,6 @@ Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Pr
     providers
   end
 
-  def create
-    @property_hash[:ensure] = :present
-    self.class.resource_type.validproperties.each do |property|
-      if val = resource.should(property)
-        @property_hash[property] = val
-      end
-    end
-  end
-
-  def delete
-    @property_hash[:ensure] = :absent
-  end
-
-  def exists?
-    @property_hash[:ensure] != :absent
-  end
-
   # Apply the changes to Opsview
   def flush
     if @hosttemplate_json
@@ -124,7 +107,7 @@ Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Pr
     end
   
     # Flush changes:
-    put 'hosttemplate', @updated_json.to_json
+    put @updated_json.to_json
 
     @property_hash.clear
     @hosttemplate_properties.clear

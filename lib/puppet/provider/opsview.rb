@@ -1,8 +1,29 @@
-require 'rest-client'
-require 'json'
+begin
+  require 'rest-client'
+  require 'json'
+rescue LoadError => e
+  nil
+end
 require 'yaml'
 
 class Puppet::Provider::Opsview < Puppet::Provider
+  def create
+    @property_hash[:ensure] = :present
+    self.class.resource_type.validproperties.each do |property|
+      if val = resource.should(property)
+        @property_hash[property] = val
+      end
+    end
+  end
+
+  def delete
+    @property_hash[:ensure] = :absent
+  end
+
+  def exists?
+    @property_hash[:ensure] != :absent
+  end
+
   private
 
   def put(body)
@@ -14,7 +35,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
     begin
       response = RestClient.put url, body, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
     rescue
-      raise "Error communicating with Opsview: " + $!
+      raise Puppet::Error, "Error communicating with Opsview: " + $!
     end
 
     begin
