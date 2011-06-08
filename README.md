@@ -26,10 +26,10 @@ server.
 
 2. Create a subclass called "Puppet::Provider::Opsview" with default methods
 that may be overridden by any of the providers.  The class contains methods
-that actually hook into the server - thus, in the provider Ruby files (in
-particular, the flush method) is reduced quite a bit, and we don't need to
-explicitly define a function that reads in token information from the Opsview
-server. 
+that actually hook into the server - thus, the provider Ruby files (in
+particular, the flush method in each file) are reduced quite a bit, and we
+don't need to explicitly define a function that reads in token information from
+the Opsview server. 
 
 3. Rename variables and methods, so they don't use camel case.
 
