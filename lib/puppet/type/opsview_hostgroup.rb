@@ -21,8 +21,8 @@ Puppet::Type.newtype(:opsview_hostgroup) do
 
   # Autorequire parent hostgroup
   autorequire(:opsview_hostgroup) do
-    if defined? self[:parent]
-      [self[:parent]]
+    if @resource.include? [:parent]
+      @resource[:parent]
     else
       nil
     end
