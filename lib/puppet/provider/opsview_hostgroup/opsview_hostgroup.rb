@@ -39,13 +39,14 @@ require 'puppet'
 require 'yaml'
 
 Puppet::Type.type(:opsview_hostgroup).provide :opsview, :parent => Puppet::Provider::Opsview do
+  @req_type = 'hostgroup'
 
   mk_resource_methods
 
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get('hostgroup', name)
+      if result = get_resource(name)
         result[:ensure] = :present
         resource.provider = new(result)
       else
@@ -58,7 +59,7 @@ Puppet::Type.type(:opsview_hostgroup).provide :opsview, :parent => Puppet::Provi
     providers = []
 
     # Retrieve all hostgroups.  Expensive query.
-    hostgroups = get 'hostgroup'
+    hostgroups = get_resources
 
     hostgroups["list"].each do |hostgroup|
       p = { :name      => hostgroup["name"],

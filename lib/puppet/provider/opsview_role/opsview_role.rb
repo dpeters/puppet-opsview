@@ -39,13 +39,14 @@ require 'puppet'
 require 'yaml'
 
 Puppet::Type.type(:opsview_role).provide :opsview, :parent => Puppet::Provider::Opsview do
+  @req_type = 'role'
 
   mk_resource_methods
 
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get('role', name)
+      if result = get_resource(name)
         result[:ensure] = :present
         resource.provider = new(result)
       else
@@ -58,7 +59,7 @@ Puppet::Type.type(:opsview_role).provide :opsview, :parent => Puppet::Provider::
     providers = []
 
     # Retrieve all roles.  Expensive query.
-    roles = get 'role'
+    roles = get_resources
 
     roles["list"].each do |role|
       p = { :name      => role["name"],

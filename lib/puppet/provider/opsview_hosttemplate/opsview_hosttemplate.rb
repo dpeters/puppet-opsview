@@ -39,13 +39,14 @@ require 'puppet'
 require 'yaml'
 
 Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Provider::Opsview do
+  @req_type = 'hosttemplate'
 
   mk_resource_methods
 
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get('hosttemplate', name)
+      if result = get_resource(name)
         result[:ensure] = :present
         resource.provider = new(result)
       else
@@ -58,7 +59,7 @@ Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Pr
     providers = []
 
     # Retrieve all hosttemplates.  Expensive query.
-    hosttemplates = get 'hosttemplate'
+    hosttemplates = get_resources
 
     hosttemplates["list"].each do |hosttemplate|
       p = { :name          => hosttemplate["name"],

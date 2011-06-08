@@ -5,57 +5,71 @@ require 'yaml'
 class Puppet::Provider::Opsview < Puppet::Provider
   private
 
-  def self.config
-    unless @@config
-      config_file = "/etc/puppet/opsview.conf"
-      # Load the Opsview config
-      begin
-        @@config = YAML.load_file(config_file)
-      rescue
-        raise(Puppet::DevError, "Could not parse YAML configuration file " + config_file + " " + $!)
-      end
-
-      if @@config["username"].nil? or @@config["password"].nil? or @@config["url"].nil?
-        raise(Puppet::DevError, "Config file must contain URL, username, and password fields.")
-      end
-    end
-    @@config
+  def put(body)
+    self.class.put(body)
   end
 
-  def self.url(req_type)
-    case req_type.downcase
-    when "login"
-      url = [ config["url"], "login" ].join("/")
-    when "node"
-      url = [ config["url"], "config/host" ].join("/")
-    when "hosttemplate"
-      url = [ config["url"], "config/hosttemplate" ].join("/")
-    when "contact"
-      url = [ config["url"], "config/contact" ].join("/")
-    when "hostgroup"
-      url = [ config["url"], "config/hostgroup" ].join("/")
-    when "role"
-      url = [ config["url"], "config/role" ].join("/")
-    when "servicecheck"
-      url = [ config["url"], "config/servicecheck" ].join("/")
-    when "servicegroup"
-      url = [ config["url"], "config/servicegroup" ].join("/")
-    else
-      raise(Puppet::DevError, "self.url needs to be extended to handle the req_type you've given: " + req_type)
+  def self.put(body)
+    url = [ config["url"], "config/#{@req_type.downcase}" ].join("/")
+    begin
+      response = RestClient.put url, body, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
+    rescue
+      raise "Error communicating with Opsview: " + $!
     end
-    url
+
+    begin
+      responseJson = JSON.parse(response)
+    rescue
+      raise "Could not parse the JSON response from Opsview: " + response
+    end
+
+    begin
+      reload_opsview
+    rescue => e
+      raise "Was not able to reload Opsview: " + e
+    end
+  end
+
+  def config
+    self.class.config
+  end
+
+  def self.config
+    @config ||= get_config
+  end
+
+  def self.get_config
+    config_file = "/etc/puppet/opsview.conf"
+    # Load the Opsview config
+    begin
+      conf = YAML.load_file(config_file)
+    rescue
+      raise(Puppet::DevError, "Could not parse YAML configuration file " + config_file + " " + $!)
+    end
+
+    if conf["username"].nil? or conf["password"].nil? or conf["url"].nil?
+      raise(Puppet::DevError, "Config file must contain URL, username, and password fields.")
+    end
+
+    conf
+  end
+
+  def token
+    self.class.token
   end
 
   def self.token
-    @@token ||= get_token
+    @token ||= get_token
   end
 
   def self.get_token
     post_body = { "username" => config["username"],
                   "password" => config["password"] }.to_json
 
+    url = [ config["url"], "login" ].join("/")
+
     begin
-      response = RestClient.post url('login'), post_body, :content_type => :json
+      response = RestClient.post url, post_body, :content_type => :json
     rescue
       raise "Error communicating with Opsview: " + $!
     end
@@ -67,41 +81,52 @@ class Puppet::Provider::Opsview < Puppet::Provider
       raise "Was not able to login to Opsview to grab the token."
     end
 
-    @@token = JSON.parse(response)['token']
+    received_token = JSON.parse(response)['token']
+    received_token
+  end
+
+  def reload_opsview
+    self.class.reload_opsview
   end
 
   def self.reload_opsview
     url = [ config["url"], "reload" ].join("/")
 
-    get_cookies = { :x_opsview_username => config["username"],
-                    :x_opsview_token    => token }
-
     begin
-      response = RestClient.get url, { :cookies => get_cookies }, :content_type => :json, :accept => :json
+      response = RestClient.post url, '', :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
     rescue
       raise "Error communicating with Opsview: " + $!
     end
 
     case response.code
-    when "200"
+    when 200
       Puppet.debug "Reloaded Opsview"
+    when 401
+      raise "Login failed: " + response.code
+    when 409
+      Puppet.info "Opsview reload already in progress"
     else
-      raise "Was not able to reload Opsview!"
+      raise "Was not able to reload Opsview: " + response.code
     end
   end
 
-  def self.get(req_type, name = nil)
-    get_cookies = { :x_opsview_username => config["username"],
-                    :x_opsview_token    => token }
+  def get_resource(name = nil)
+    self.class.get_resource(name)
+  end
 
+  def get_resources
+    self.class.get_resources
+  end
+
+  def self.get_resource(name = nil)
     if name.nil?
-      full_url = url(req_type)
+      raise "Did not specify a node to look up."
     else
-      full_url = URI.escape("#{url(req_type)}?s.name=#{name}")
+      url = URI.escape( [ config["url"], "config/#{@req_type.downcase}?s.name=#{name}" ].join("/") )
     end
 
     begin
-      response = RestClient.get full_url, { :cookies => get_cookies }, :content_type => :json, :accept => :json
+      response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
     rescue
       raise "Error communicating with Opsview: " + $!
     end
@@ -115,21 +140,21 @@ class Puppet::Provider::Opsview < Puppet::Provider
     responseJson
   end
 
-  def self.put(req_type, body)
-    put_cookies = { :x_opsview_username => config["username"],
-                    :x_opsview_token    => token }
+  def self.get_resources
+    url = [ config["url"], "config/#{@req_type.downcase}" ].join("/")
 
     begin
-      response = RestClient.put url(req_type), body, { :cookies => put_cookies }, :content_type => :json, :accept => :json
+      response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
     rescue
       raise "Error communicating with Opsview: " + $!
     end
 
     begin
       responseJson = JSON.parse(response)
-      reload_opsview
     rescue
       raise "Could not parse the JSON response from Opsview: " + response
     end
+
+    responseJson
   end
 end

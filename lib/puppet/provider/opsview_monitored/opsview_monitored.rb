@@ -38,13 +38,14 @@ require 'puppet'
 require 'yaml'
 
 Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provider::Opsview do
+  @req_type = 'host'
 
   mk_resource_methods
 
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get('node', name)
+      if result = get_resource(name)
         result[:ensure] = :present
         resource.provider = new(result)
       else
@@ -57,7 +58,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     providers = []
 
     # Retrieve all nodes.  Expensive query.
-    nodes = get 'node'
+    nodes = get_resources
 
     nodes["list"].each do |node|
       p = { :name => node["name"],
@@ -114,7 +115,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
       end
     end
   
-    put 'node', @updated_json.to_json
+    put @updated_json.to_json
 
     @property_hash.clear
     @node_properties.clear

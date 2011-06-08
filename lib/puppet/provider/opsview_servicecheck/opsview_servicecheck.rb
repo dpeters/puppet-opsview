@@ -39,13 +39,14 @@ require 'puppet'
 require 'yaml'
 
 Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Provider::Opsview do
+  @req_type = 'servicecheck'
 
   mk_resource_methods
 
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     resources.each do |name, resource|
-      if result = get('servicecheck', name)
+      if result = get_resource(name)
         result[:ensure] = :present
         resource.provider = new(result)
       else
@@ -58,7 +59,7 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
     providers = []
 
     # Retrieve all servicechecks.  Expensive query.
-    servicechecks = get 'servicecheck'
+    servicechecks = get_resources
 
     servicechecks["list"].each do |servicecheck|
       p = { :name         => servicecheck["name"],
