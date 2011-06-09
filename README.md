@@ -17,6 +17,12 @@ These libraries are currently used in production at [Seattle Biomed][1].
 
 Please file bugs via the issue tracker above.
 
+Prerequisites
+=============
+
+* Puppet (of course :))  Tested with Puppet 2.6.8.
+* rest-client, json gems.
+
 Resources/Providers
 ===================
 
