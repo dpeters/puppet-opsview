@@ -63,6 +63,6 @@ Authors
 
 * Devon Peters (original author of every other provider library except for
 opsview_monitored.rb)
-* Christian Paredes <christian.paredes@sbri.org>
+* Christian Paredes &lt;christian.paredes@sbri.org&gt;
 
 [1]: http://seattlebiomed.org
