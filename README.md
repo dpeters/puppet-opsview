@@ -64,6 +64,8 @@ in a utility module instead.
 2. Clean up Puppet::Provider::Opsview in general.  Cull any class/instance
 methods we don't need (there's lots of duplication.)
 
+3. Add default providers so that Puppet runs don't fail when there's no rest-client / json gems to use.
+
 Authors
 =======
 
