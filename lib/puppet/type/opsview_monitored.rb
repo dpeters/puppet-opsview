@@ -22,11 +22,19 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "Array of Opsview host templates that should be applied to this node"
   end
 
+  newproperty(:servicechecks, :array_matching => :all) do
+    desc "Array of Opsview service checks that should be applied to this node"
+  end
+
   autorequire(:opsview_hostgroup) do
     [self[:hostgroup]]
   end
 
   autorequire(:opsview_hosttemplate) do
     self[:hosttemplates]
+  end
+
+  autorequire(:opsview_servicecheck) do
+    self[:servicechecks]
   end
 end
