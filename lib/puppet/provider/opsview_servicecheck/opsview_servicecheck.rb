@@ -114,6 +114,9 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
     if not @property_hash[:servicegroup].to_s.empty?
       @updated_json["servicegroup"]["name"] = @property_hash[:servicegroup]
     end
+    if not @property_hash[:description].to_s.empty?
+      @updated_json["description"] = @property_hash[:description]
+    end
     if not @property_hash[:plugin].to_s.empty?
       @updated_json["plugin"]["name"] = @property_hash[:plugin]
     end
