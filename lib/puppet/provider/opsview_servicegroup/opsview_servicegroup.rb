@@ -57,8 +57,6 @@ Puppet::Type.type(:opsview_servicegroup).provide :opsview, :parent => Puppet::Pr
     resources.each do |name, resource|
       if servicegroup = get_resource(name)
         resource.provider = new(servicegroup_map(servicegroup))
-      else
-        resource.provider = new(:ensure => :absent)
       end
     end
   end
