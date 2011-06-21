@@ -50,6 +50,13 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :hosttemplates => node["hosttemplates"].collect{ |ht| ht["name"] },
           :full_json     => node,
           :ensure        => :present }
+    # optional properties
+    if defined? node["parents"]
+      p[:parents] = node["parents"].collect{ |prnt| prnt["name"] }
+    end
+    if defined? node["monitored_by"]["name"]
+      p[:monitored_by] = node["monitored_by"]["name"]
+    end
     p
   end
 
@@ -107,6 +114,17 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
       @property_hash[:servicechecks].each do |sc|
         @updated_json["servicechecks"] << {:name => sc}
       end
+    end
+    
+    @updated_json["parents"] = []
+    if @property_hash[:parents]
+      @property_hash[:parents].each do |pa|
+        @updated_json["parents"] << {:name => pa}
+      end
+    end
+    
+    if not @property_hash[:monitored_by].to_s.empty?
+      @updated_json["monitored_by"]["name"] = @property_hash[:monitored_by]
     end
   
     put @updated_json.to_json
