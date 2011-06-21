@@ -22,8 +22,8 @@ Puppet::Type.newtype(:opsview_servicecheck) do
   
   [:check_period, :check_interval, :check_attempts, :retry_check_interval,
    :plugin, :args, :invertresults, :notification_options,
-   :notification_period, :notification_interval, :flap_detection_enabled
-   ].each do |property|
+   :notification_period, :notification_interval, :flap_detection_enabled,
+   :volatile, :stalking].each do |property|
     newproperty(property) do
       desc "General opsview servicecheck parameter"
     end

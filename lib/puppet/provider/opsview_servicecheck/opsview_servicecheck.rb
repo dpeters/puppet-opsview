@@ -62,7 +62,7 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
     end
     [:check_interval, :check_attempts, :retry_check_interval,
      :invertresults, :notification_options, :notification_period,
-     :notification_interval, :flap_detection_enabled
+     :notification_interval, :flap_detection_enabled, :volatile, :stalking
     ].each do |prop|
       p[prop] = servicecheck[prop.id2name] if defined? servicecheck[prop.id2name]
     end
@@ -125,8 +125,8 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
     end
     [:check_interval, :check_attempts, :retry_check_interval,
      :args, :invertresults, :notification_options,
-     :notification_period, :notification_interval, :flap_detection_enabled
-    ].each do |property|
+     :notification_period, :notification_interval, :flap_detection_enabled,
+     :volatile, :stalking].each do |property|
       if not @property_hash[property].to_s.empty?
         @updated_json[property.id2name] = @property_hash[property]
       end
@@ -216,6 +216,8 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
             "name" : "check_nrpe"
          },
          "args" : "",
+         "stalking" : null,
+         "volatile" : "0",
          "invertresults" : "0",
          "notification_options" : "w,c,r",
          "notification_period" : null,
