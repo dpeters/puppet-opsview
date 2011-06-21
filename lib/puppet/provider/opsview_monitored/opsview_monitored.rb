@@ -211,7 +211,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
        "monitored_by" : {
           "name" : "Master Monitoring Server"
        },
-       "alias" : "Puppet Unknown Host",
+       "alias" : "Puppet Managed Host",
        "uncommitted" : "0",
        "parents" : [],
        "icon" : {
