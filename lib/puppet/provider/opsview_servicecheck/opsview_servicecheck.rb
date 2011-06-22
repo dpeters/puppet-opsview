@@ -60,10 +60,12 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
     if defined? servicecheck["check_period"]["name"]
       p[:check_period] = servicecheck["check_period"]["name"]
     end
+    if defined? sc["notification_period"]["name"]
+      p[:notification_period] = servicecheck["notification_period"]["name"]
+    end
     [:check_interval, :check_attempts, :retry_check_interval,
-     :invertresults, :notification_options, :notification_period,
-     :notification_interval, :flap_detection_enabled, :volatile, :stalking
-    ].each do |prop|
+     :invertresults, :notification_options, :notification_interval,
+     :flap_detection_enabled, :volatile, :stalking].each do |prop|
       p[prop] = servicecheck[prop.id2name] if defined? servicecheck[prop.id2name]
     end
     p
@@ -123,10 +125,14 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
     if not @property_hash[:check_period].to_s.empty?
       @updated_json["check_period"]["name"] = @property_hash[:check_period]
     end
+    if not @property_hash[:notification_period].to_s.empty?
+      @updated_json["notification_period"] = Hash.new
+      @updated_json["notification_period"]["name"] = @property_hash[:notification_period]
+    end
     [:check_interval, :check_attempts, :retry_check_interval,
      :args, :invertresults, :notification_options,
-     :notification_period, :notification_interval, :flap_detection_enabled,
-     :volatile, :stalking].each do |property|
+     :notification_interval, :flap_detection_enabled, :volatile, :stalking
+    ].each do |property|
       if not @property_hash[property].to_s.empty?
         @updated_json[property.id2name] = @property_hash[property]
       end
