@@ -1,3 +1,9 @@
+Stable release download
+=======================
+
+If you're looking for stable releases, you can download this module at
+the [Puppet Forge](http://forge.puppetlabs.com/users/cparedes/modules/puppet_opsview).
+
 Introduction
 =============
 
@@ -53,7 +59,7 @@ the Opsview server.
 3. Rename variables and methods, so they don't use camel case.
 
 4. Rename resources so that they have underscores in them (seems to make more
-sense to me to use opsview_monitored vs. opsview_monitored.)
+sense to me to use opsview_monitored vs. opsviewmonitored.)
 
 List of things to do
 ====================
@@ -69,8 +75,7 @@ methods we don't need (there's lots of duplication.)
 Authors
 =======
 
-* Devon Peters (original author of every other provider library except for
-opsview_monitored.rb)
+* Devon Peters &lt;devon.peters@gmail.com&gt; (original author of every provider except opsview_monitored)
 * Christian Paredes &lt;christian.paredes@sbri.org&gt;
 
 [1]: http://seattlebiomed.org
