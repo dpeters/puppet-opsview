@@ -64,11 +64,9 @@ Puppet::Type.type(:opsview_notificationmethod).provide :opsview, :parent => Pupp
 
   # Query the current resource state from Opsview
   def self.prefetch(resources)
-    resources.each do |name, resource|
-      if notificationmethod = get_resource(name)
-        resource.provider = new(notificationmethod_map(notificationmethod))
-      else
-        resource.provider = new(:ensure => :absent)
+    instances.each do |provider|
+      if notificationmethod = resources[provider.name]
+        notificationmethod.provider = provider
       end
     end
   end
