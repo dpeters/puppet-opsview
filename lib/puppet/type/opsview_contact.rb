@@ -129,7 +129,7 @@ Puppet::Type.newtype(:opsview_contact) do
     end
     hostgroups
   end
-  autorequire(:opsviewservicegroup) do
+  autorequire(:opsview_servicegroup) do
     servicegroups = []
     if not self[:servicegroups8x5].to_s.empty?
       servicegroups += self[:servicegroups8x5]
@@ -142,7 +142,7 @@ Puppet::Type.newtype(:opsview_contact) do
   autorequire(:opsview_role) do
     [self[:role]]
   end
-  autorequire(:opsviewnotificationmethod) do
+  autorequire(:opsview_notificationmethod) do
     nms = []
     if not self[:notificationmethods8x5].to_s.empty?
       nms += self[:notificationmethods8x5]
