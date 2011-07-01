@@ -53,8 +53,8 @@ Puppet::Type.type(:opsview_role).provide :opsview, :parent => Puppet::Provider::
      :all_servicegroups, :all_keywords].each do |property|
       if defined? role[property.id2name]
         p[property] = role[property.id2name]
-        end
       end
+    end
     [:access_hostgroups, :access_servicegroups, :access_keywords, :accesses,
      :hostgroups].each do |property|
       if defined? role[property.id2name]
