@@ -46,7 +46,6 @@ Puppet::Type.type(:opsview_notificationmethod).provide :opsview, :parent => Pupp
 
   def self.notificationmethod_map(nm)
     p = { :name               => nm["name"],
-          :notificationmethod => nm["name"],
           :command            => nm["command"],
           :full_json          => nm,
           :ensure             => :present }
@@ -60,6 +59,7 @@ Puppet::Type.type(:opsview_notificationmethod).provide :opsview, :parent => Pupp
     if defined? nm["contact_variables"]
       p[:contact_variables] = nm["contact_variables"]
     end
+    p
   end
 
   # Query the current resource state from Opsview
