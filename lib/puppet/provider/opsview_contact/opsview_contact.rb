@@ -58,6 +58,9 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
         p[:email] = variable["value"]
       end
     end
+    if defined? contact["role"]["name"]
+      p[:role] = contact["role"]["name"]
+    end
     if defined? contact["notificationprofiles"]
       contact["notificationprofiles"].each do |profile|
         if profile["name"] == "8x5"
@@ -311,9 +314,11 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
             profile["all_servicegroups"] = @property_hash[allsg_sym]
           end
           # Set the notificationmethods
-          profile["notificationmethods"] = []
-          @property_hash[nm_sym].each do |nm|
-            profile["notificationmethods"] << {:name => nm}
+          if not @property_hash[nm_sym].to_s.empty?
+            profile["notificationmethods"] = []
+            @property_hash[nm_sym].each do |nm|
+              profile["notificationmethods"] << {:name => nm}
+            end
           end
           # Set the notification options
           if not @property_hash[hno_sym].to_s.empty?
