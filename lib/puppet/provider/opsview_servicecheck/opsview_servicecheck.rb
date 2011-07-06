@@ -60,7 +60,7 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
     if defined? servicecheck["check_period"]["name"]
       p[:check_period] = servicecheck["check_period"]["name"]
     end
-    if defined? sc["notification_period"]["name"]
+    if defined? servicecheck["notification_period"]["name"]
       p[:notification_period] = servicecheck["notification_period"]["name"]
     end
     [:check_interval, :check_attempts, :retry_check_interval,
