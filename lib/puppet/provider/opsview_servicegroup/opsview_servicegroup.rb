@@ -54,9 +54,9 @@ Puppet::Type.type(:opsview_servicegroup).provide :opsview, :parent => Puppet::Pr
 
   # Query the current resource state from Opsview
   def self.prefetch(resources)
-    resources.each do |name, resource|
-      if servicegroup = get_resource(name)
-        resource.provider = new(servicegroup_map(servicegroup))
+    instances.each do |provider|
+      if servicegroup = resources[provider.name]
+        servicegroup.provider = provider
       end
     end
   end

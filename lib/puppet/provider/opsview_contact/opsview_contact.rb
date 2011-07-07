@@ -58,14 +58,27 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
         p[:email] = variable["value"]
       end
     end
+    if defined? contact["role"]["name"]
+      p[:role] = contact["role"]["name"]
+    end
     if defined? contact["notificationprofiles"]
       contact["notificationprofiles"].each do |profile|
         if profile["name"] == "8x5"
           p[:hostgroups8x5] = profile["hostgroups"].collect{ |hg| hg["name"] }
           p[:allhostgroups8x5] = profile["all_hostgroups"]
+          p[:servicegroups8x5] = profile["servicegroups"].collect{ |sg| sg["name"] }
+          p[:allservicegroups8x5] = profile["all_servicegroups"]
+          p[:notificationmethods8x5] = profile["notificationmethods"].collect{ |nm| nm["name"] }
+          p[:service_notification_options8x5] = profile["service_notification_options"]
+          p[:host_notification_options8x5] = profile["host_notification_options"]
         elsif profile["name"] == "24x7"
           p[:hostgroups24x7] = profile["hostgroups"].collect{ |hg| hg["name"] }
           p[:allhostgroups24x7] = profile["all_hostgroups"]
+          p[:servicegroups24x7] = profile["servicegroups"].collect{ |sg| sg["name"] }
+          p[:allservicegroups24x7] = profile["all_servicegroups"]
+          p[:notificationmethods24x7] = profile["notificationmethods"].collect{ |nm| nm["name"] }
+          p[:service_notification_options24x7] = profile["service_notification_options"]
+          p[:host_notification_options24x7] = profile["host_notification_options"]
         end
       end
     end
@@ -74,11 +87,9 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
 
   # Query the current resource state from Opsview
   def self.prefetch(resources)
-    resources.each do |name, resource|
-      if contact = get_resource(name)
-        resource.provider = new(contact_map(contact))
-      else
-        resource.provider = new(:ensure => :absent)
+    instances.each do |provider|
+      if contact = resources[provider.name]
+        contact.provider = provider
       end
     end
   end
@@ -262,43 +273,64 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
 
   # return the nested array->hash->array data structure required for
   # notificationprofiles.
+  # If only opsview would let us edit these directly via the API. :(
   def update_notificationprofiles
     # This will only modify/affect the 8x5 and 24x7 profiles
     ["8x5", "24x7"].each do |profile_name|
+      nm_sym = profile_name.sub(/^/, 'notificationmethods').to_sym
       hg_sym = profile_name.sub(/^/, 'hostgroups').to_sym
       allhg_sym = profile_name.sub(/^/, 'allhostgroups').to_sym
-      if not @property_hash[hg_sym].to_s.empty?
-        notificationprofiles = []
-        @updated_json["notificationprofiles"].each do |profile|
-          if profile["name"] == profile_name
-            # Set the all_hostgroups parameter, if set
-            if not @property_hash[allhg_sym].to_s.empty?
-              profile["all_hostgroups"] = @property_hash[allhg_sym]
-            end
-            # Set hostgroups to an array of name->hostgroup hashes
+      sg_sym = profile_name.sub(/^/, 'servicegroups').to_sym
+      allsg_sym = profile_name.sub(/^/, 'allservicegroups').to_sym
+      hno_sym = profile_name.sub(/^/, 'host_notification_options').to_sym
+      sno_sym = profile_name.sub(/^/, 'service_notification_options').to_sym
+      notificationprofiles = []
+      # Get both current profiles.  We'll update the profile that we're
+      # changing now, and just pass through the one we're not changing.
+      @updated_json["notificationprofiles"].each do |profile|
+        if profile["name"] == profile_name
+          # Make the hostgroups array of hashes
+          if not @property_hash[hg_sym].to_s.empty?
             profile["hostgroups"] = []
             @property_hash[hg_sym].each do |hg|
               profile["hostgroups"] << {:name => hg}
             end
           end
-          # Append this profile to the array of hashes, whether we changed it
-          # or not
-          notificationprofiles << profile
-        end
-        @updated_json["notificationprofiles"] = notificationprofiles
-      else
-        # Process the allhostgroups* if hostgroups* is empty
-        if not @property_hash[allhg_sym].to_s.empty?
-          notificationprofiles = []
-          @updated_json["notificationprofiles"].each do |profile|
-            if profile["name"] == profile_name
-              profile["all_hostgroups"] = @property_hash[allhg_sym]
-            end
-            notificationprofiles << profile
+          # Set the all_hostgroups parameter
+          if not @property_hash[allhg_sym].to_s.empty?
+            profile["all_hostgroups"] = @property_hash[allhg_sym]
           end
-          @updated_json["notificationprofiles"] = notificationprofiles
+          # Make the servicegroups array of hashes
+          if not @property_hash[sg_sym].to_s.empty?
+            profile["servicegroups"] = []
+            @property_hash[sg_sym].each do |sg|
+              profile["servicegroups"] << {:name => sg}
+            end
+          end
+          # Set the all_servicegroups parameter
+          if not @property_hash[allsg_sym].to_s.empty?
+            profile["all_servicegroups"] = @property_hash[allsg_sym]
+          end
+          # Set the notificationmethods
+          if not @property_hash[nm_sym].to_s.empty?
+            profile["notificationmethods"] = []
+            @property_hash[nm_sym].each do |nm|
+              profile["notificationmethods"] << {:name => nm}
+            end
+          end
+          # Set the notification options
+          if not @property_hash[hno_sym].to_s.empty?
+            profile["host_notification_options"] = @property_hash[hno_sym]
+          end
+          if not @property_hash[sno_sym].to_s.empty?
+            profile["service_notification_options"] = @property_hash[sno_sym]
+          end
         end
+        # append the profile to our new array
+        notificationprofiles << profile
       end
+      # now overwrite all the profiles
+      @updated_json["notificationprofiles"] = notificationprofiles
     end
   end
 end

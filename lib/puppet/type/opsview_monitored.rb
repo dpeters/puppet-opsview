@@ -25,6 +25,14 @@ Puppet::Type.newtype(:opsview_monitored) do
   newproperty(:servicechecks, :array_matching => :all) do
     desc "Array of Opsview service checks that should be applied to this node"
   end
+  
+  newproperty(:monitored_by) do
+    desc "The Opsview server that monitors this node"
+  end
+  
+  newproperty(:parents, :array_matching => :all) do
+    desc "Array of parents for this node"
+  end
 
   autorequire(:opsview_hostgroup) do
     [self[:hostgroup]]
@@ -36,5 +44,9 @@ Puppet::Type.newtype(:opsview_monitored) do
 
   autorequire(:opsview_servicecheck) do
     self[:servicechecks]
+  end
+  
+  autorequire(:opsview_monitored) do
+    self[:parents]
   end
 end

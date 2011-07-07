@@ -53,8 +53,8 @@ Puppet::Type.type(:opsview_role).provide :opsview, :parent => Puppet::Provider::
      :all_servicegroups, :all_keywords].each do |property|
       if defined? role[property.id2name]
         p[property] = role[property.id2name]
-        end
       end
+    end
     [:access_hostgroups, :access_servicegroups, :access_keywords, :accesses,
      :hostgroups].each do |property|
       if defined? role[property.id2name]
@@ -66,11 +66,9 @@ Puppet::Type.type(:opsview_role).provide :opsview, :parent => Puppet::Provider::
 
   # Query the current resource state from Opsview
   def self.prefetch(resources)
-    resources.each do |name, resource|
-      if role = get_resource(name)
-        resource.provider = new(role_map(result))
-      else
-        resource.provider = new(:ensure => :absent)
+    instances.each do |provider|
+      if role = resources[provider.name]
+        role.provider = provider
       end
     end
   end

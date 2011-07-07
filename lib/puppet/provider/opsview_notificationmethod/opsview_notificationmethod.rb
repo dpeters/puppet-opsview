@@ -1,4 +1,5 @@
 #
+# And made original again by Devon Peters
 # Major refactor by Christian Paredes <christian.paredes@sbri.org>
 # Original file by Devon Peters
 #
@@ -38,30 +39,34 @@ require 'puppet'
 # Config file parsing
 require 'yaml'
 
-Puppet::Type.type(:opsview_hostgroup).provide :opsview, :parent => Puppet::Provider::Opsview do
-  @req_type = 'hostgroup'
+Puppet::Type.type(:opsview_notificationmethod).provide :opsview, :parent => Puppet::Provider::Opsview do
+  @req_type = 'notificationmethod'
 
   mk_resource_methods
 
-  def self.hostgroup_map(hostgroup)
-    p = { :name      => hostgroup["name"],
-          :hostgroup => hostgroup["name"],
-          :full_json => hostgroup,
-          :ensure    => :present }
-
+  def self.notificationmethod_map(nm)
+    p = { :name               => nm["name"],
+          :command            => nm["command"],
+          :full_json          => nm,
+          :ensure             => :present }
     # optional properties
-    if defined? hostgroup["parent"]["name"]
-      p[:parent] = hostgroup["parent"]["name"]
+    if defined? nm["master"]
+      p[:master] = nm["master"]
     end
-
+    if defined? nm["active"]
+      p[:active] = nm["active"]
+    end
+    if defined? nm["contact_variables"]
+      p[:contact_variables] = nm["contact_variables"]
+    end
     p
   end
 
   # Query the current resource state from Opsview
   def self.prefetch(resources)
     instances.each do |provider|
-      if hostgroup = resources[provider.name]
-        hostgroup.provider = provider
+      if notificationmethod = resources[provider.name]
+        notificationmethod.provider = provider
       end
     end
   end
@@ -69,11 +74,11 @@ Puppet::Type.type(:opsview_hostgroup).provide :opsview, :parent => Puppet::Provi
   def self.instances
     providers = []
 
-    # Retrieve all hostgroups.  Expensive query.
-    hostgroups = get_resources
+    # Retrieve all notificationmethods.  Expensive query.
+    notificationmethods = get_resources
 
-    hostgroups.each do |hostgroup|
-      providers << new(hostgroup_map(hostgroup))
+    notificationmethods.each do |notificationmethod|
+      providers << new(notificationmethod_map(notificationmethod))
     end
 
     providers
@@ -81,25 +86,34 @@ Puppet::Type.type(:opsview_hostgroup).provide :opsview, :parent => Puppet::Provi
 
   # Apply the changes to Opsview
   def flush
-    if @hostgroup_json
-      @updated_json = @hostgroup_json.dup
+    if @notificationmethod_json
+      @updated_json = @notificationmethod_json.dup
     else
-      @updated_json = default_hostgroup
+      @updated_json = default_notificationmethod
     end
  
-    # Update the hostgroup's JSON values based on any new params.  Sadly due to the
+    # Update the notificationmethod's JSON values based on any new params.  Sadly due to the
     # structure of the JSON vs the flat nature of the puppet properties, this
     # is a bit of a manual task.
-    if not @property_hash[:parent].to_s.empty?
-      @updated_json["parent"]["name"] = @property_hash[:parent]
+    @updated_json["name"] = @resource[:name]
+    if not @property_hash[:master].to_s.empty?
+      @updated_json["master"] = @property_hash[:master]
     end
-    @updated_json["name"] = @resource[:hostgroup]
+    if not @property_hash[:active].to_s.empty?
+      @updated_json["active"] = @property_hash[:active]
+    end
+    if not @property_hash[:command].to_s.empty?
+      @updated_json["command"] = @property_hash[:command]
+    end
+    if not @property_hash[:contact_variables].to_s.empty?
+      @updated_json["contact_variables"] = @property_hash[:contact_variables]
+    end
   
     # Flush changes:
     put @updated_json.to_json
 
     @property_hash.clear
-    @hostgroup_properties.clear
+    @notificationmethod_properties.clear
 
     false
   end
@@ -107,9 +121,9 @@ Puppet::Type.type(:opsview_hostgroup).provide :opsview, :parent => Puppet::Provi
   def initialize(*args)
     super
 
-    # Save the JSON for the hostgroup if it's present in the arguments
+    # Save the JSON for the notificationmethod if it's present in the arguments
     if args[0].class == Hash and args[0].has_key?(:full_json)
-      @hostgroup_json = args[0][:full_json]
+      @notificationmethod_json = args[0][:full_json]
     end
 
     @property_hash = @property_hash.inject({}) do |result, ary|
@@ -136,12 +150,12 @@ Puppet::Type.type(:opsview_hostgroup).provide :opsview, :parent => Puppet::Provi
       result
     end
 
-    @hostgroup_properties = @property_hash.dup
+    @notificationmethod_properties = @property_hash.dup
   end
 
-  # Return the current state of the hostgroup in Opsview.
-  def hostgroup_properties
-    @hostgroup_properties.dup
+  # Return the current state of the notificationmethod in Opsview.
+  def notificationmethod_properties
+    @notificationmethod_properties.dup
   end
 
   # Return (and look up if necessary) the desired state.
@@ -155,13 +169,14 @@ Puppet::Type.type(:opsview_hostgroup).provide :opsview, :parent => Puppet::Provi
     @property_hash.dup
   end
 
-  def default_hostgroup
+  def default_notificationmethod
     json = '
      {
-       "parent" : {
-         "name" : "Opsview"
-       },
-       "name" : "puppet-unknown"
+         "master" : "0",
+         "name" : "Puppet - Unknown",
+         "active" : "1",
+         "command" : "notify_by_email",
+         "contact_variables" : "EMAIL"
      }'
 
     JSON.parse(json.to_s)

@@ -147,7 +147,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
     end
 
     begin
-      response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
+      response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all}
     rescue
       raise "Error communicating with Opsview: " + $!
     end
@@ -167,7 +167,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
     url = [ config["url"], "config/#{@req_type.downcase}" ].join("/")
 
     begin
-      response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
+      response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all}
     rescue
       raise "Error communicating with Opsview: " + $!
     end
