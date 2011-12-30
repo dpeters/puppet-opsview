@@ -19,6 +19,9 @@ Puppet::Type.newtype(:opsview_servicecheck) do
   newproperty(:dependencies, :array_matching => :all) do
     desc "Array of dependencies for this servicecheck"
   end
+  newproperty(:keywords, :array_matching => :all) do
+    desc "Array of keywords for this servicecheck"
+  end
   
   [:check_period, :check_interval, :check_attempts, :retry_check_interval,
    :plugin, :args, :invertresults, :notification_options,
@@ -31,6 +34,10 @@ Puppet::Type.newtype(:opsview_servicecheck) do
   
   autorequire(:opsview_servicegroup) do
     [self[:servicegroup]]
+  end
+  
+  autorequire(:opsview_keyword) do
+    [self[:keywords]]
   end
   
 end

@@ -26,6 +26,10 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "Array of Opsview service checks that should be applied to this node"
   end
   
+  newproperty(:keywords, :array_matching => :all) do
+    desc "Array of Opsview keywords should be applied to this node"
+  end
+  
   newproperty(:monitored_by) do
     desc "The Opsview server that monitors this node"
   end
@@ -48,5 +52,9 @@ Puppet::Type.newtype(:opsview_monitored) do
   
   autorequire(:opsview_monitored) do
     self[:parents]
+  end
+  
+  autorequire(:opsview_keyword) do
+    self[:keywords]
   end
 end

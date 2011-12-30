@@ -48,11 +48,15 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :hostgroup     => node["hostgroup"]["name"],
           :servicechecks => node["servicechecks"].collect{ |sc| sc["name"] },
           :hosttemplates => node["hosttemplates"].collect{ |ht| ht["name"] },
+          :keywords      => node["keywords"].collect{ |kw| kw["name"] },
           :full_json     => node,
           :ensure        => :present }
     # optional properties
     if defined? node["parents"]
       p[:parents] = node["parents"].collect{ |prnt| prnt["name"] }
+    end
+    if defined? node["keywords"]
+      p[:keywords] = node["keywords"].collect{ |kw| kw["name"] }
     end
     if defined? node["monitored_by"]["name"]
       p[:monitored_by] = node["monitored_by"]["name"]
@@ -111,6 +115,13 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     if @property_hash[:servicechecks]
       @property_hash[:servicechecks].each do |sc|
         @updated_json["servicechecks"] << {:name => sc}
+      end
+    end
+    
+    @updated_json["keywords"] = []
+    if @property_hash[:keywords]
+      @property_hash[:keywords].each do |kw|
+        @updated_json["keywords"] << {:name => kw}
       end
     end
     
@@ -190,7 +201,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
        "flap_detection_enabled" : "1",
        "snmpv3_privprotocol" : null,
        "hosttemplates" : [],
-       "keywords" : [ ],
+       "keywords" : [],
        "check_period" : {
           "name" : "24x7"
        },

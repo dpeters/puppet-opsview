@@ -54,4 +54,11 @@ Puppet::Type.newtype(:opsview_keyword) do
   newproperty(:roles, :array_matching => :all) do
     desc "Array of roles which can view this keyword"
   end
+  
+  autorequire(:opsview_servicecheck) do
+    [self[:servicechecks]]
+  end
+  autorequire(:opsview_monitored) do
+    [self[:hosts]]
+  end
 end
