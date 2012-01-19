@@ -37,6 +37,7 @@ TODO: Need to list parameters for each resource.
 * opsview_contact
 * opsview_hostgroup
 * opsview_hosttemplate
+* opsview_keyword
 * opsview_monitored
 * opsview_role
 * opsview_servicecheck
