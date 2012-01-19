@@ -57,6 +57,9 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
     if defined? servicecheck["dependencies"]
       p[:dependencies] = servicecheck["dependencies"].collect{ |dp| dp["name"] }
     end
+    if defined? servicecheck["keywords"]
+      p[:keywords] = servicecheck["keywords"].collect{ |kw| kw["name"] }
+    end
     if defined? servicecheck["check_period"]["name"]
       p[:check_period] = servicecheck["check_period"]["name"]
     end
@@ -109,6 +112,12 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
     if @property_hash[:dependencies]
       @property_hash[:dependencies].each do |dep|
         @updated_json["dependencies"] << {:name => dep}
+      end
+    end
+    @updated_json["keywords"] = []
+    if @property_hash[:keywords]
+      @property_hash[:keywords].each do |kw|
+        @updated_json["keywords"] << {:name => kw}
       end
     end
     if not @property_hash[:servicegroup].to_s.empty?
