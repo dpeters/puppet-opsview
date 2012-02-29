@@ -48,14 +48,15 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
           :full_json => contact,
           :ensure    => :present }
 
-      # optional properties
+    # optional properties
     [:fullname, :description, :encrypted_password, :language].each do |prop|
       p[prop] = contact[prop.id2name] if defined? contact[prop.id2name]
     end
 
-    contact["variables"].each do |variable|
-      if variable["name"] == "EMAIL"
-        p[:email] = variable["value"]
+    if defined? contact["variables"]
+      p[:variables] = {}
+      contact["variables"].each do |var|
+        p[:variables][var["name"]] = var["value"]
       end
     end
     if defined? contact["role"]["name"]
@@ -114,7 +115,7 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
     else
       @updated_json = default_contact
     end
- 
+
     # Update the contact's JSON values based on any new params.  Sadly due to the
     # structure of the JSON vs the flat nature of the puppet properties, this
     # is a bit of a manual task.
@@ -124,22 +125,18 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
         @updated_json[property.id2name] = @property_hash[property]
       end
     end
-    if not @property_hash[:email].to_s.empty?
-      v = []
-      @updated_json["variables"].each do |variable|
-        if variable["name"] == "EMAIL"
-          variable["value"] = @property_hash[:email]
-        end
-        v << variable
+    if not @property_hash[:variables].to_s.empty?
+      @updated_json["variables"] = []
+      @property_hash[:variables].each do |k,v|
+        @updated_json["variables"] << {"name" => k, "value" => v}
       end
-      @updated_json["variables"] = v
     end
     if not @property_hash[:role].to_s.empty?
       @updated_json["role"]["name"] = @property_hash[:role]
     end
     # Update @updated_json["notificationprofiles"]
     update_notificationprofiles
-  
+
     # Flush changes:
     put @updated_json.to_json
 
