@@ -30,8 +30,23 @@ Puppet::Type.newtype(:opsview_contact) do
   newproperty(:language) do
     desc "The user's language"
   end
-  newproperty(:email) do
-    desc "Email address for the user."
+  newproperty(:variables) do
+    desc "A hash containing the contact notification variables and their values.  Example:
+    ...
+    variables => { 'EMAIL' => 'someone@example.com', 'PAGER' => '555-1234' },
+    ..."
+    validate do |value|
+      unless value.nil? or value.is_a? Hash
+        raise Puppet::Error, "the opsview_contact 'variables' property must be a Hash, not #{value.class}"
+      end
+    end
+    # Only check for variables that are being defined in the manifest. Opsview
+    # will automatically add all available variables to every contact, and this
+    # allows us to only care about the variables we defined in the manifest.
+    def insync?(is)
+      is.delete_if {|k, v| true if not @should[0].has_key?(k)}
+      super(is)
+    end
   end
   # HACK: The following *8x5 and *24x7 properties are hard-coded into this
   #       provider since we can't manage notificationprofile objects via the
@@ -118,7 +133,7 @@ Puppet::Type.newtype(:opsview_contact) do
       end
     end
   end
-  
+
   autorequire(:opsview_hostgroup) do
     hostgroups = []
     if not self[:hostgroups8x5].to_s.empty?
