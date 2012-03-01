@@ -44,7 +44,7 @@ Puppet::Type.newtype(:opsview_contact) do
     # will automatically add all available variables to every contact, and this
     # allows us to only care about the variables we defined in the manifest.
     def insync?(is)
-      is.delete_if {|k, v| true if not @should[0].has_key?(k)}
+      is.delete_if {|k, v| true if not @should[0].has_key?(k)} if is.is_a? Hash
       super(is)
     end
   end
