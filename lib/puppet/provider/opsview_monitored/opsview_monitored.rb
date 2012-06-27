@@ -44,6 +44,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
 
   def self.node_map(node)
     p = { :name          => node["name"],
+          :obj_id        => node["id"],
           :ip            => node["ip"],
           :hostgroup     => node["hostgroup"]["name"],
           :servicechecks => node["servicechecks"].collect{ |sc| sc["name"] },
@@ -88,59 +89,61 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
 
   # Apply the changes to Opsview
   def flush
-    if @node_json
-      @updated_json = @node_json.dup
-    else
-      @updated_json = default_node
-    end
- 
-    @property_hash.delete(:groups)
-    @node_properties.delete(:groups)
- 
-    # Update the node's JSON values based on any new params.  Sadly due to the
-    # structure of the JSON vs the flat nature of the puppet properties, this
-    # is a bit of a manual task.
-    @updated_json["hostgroup"]["name"] = @property_hash[:hostgroup]
-    @updated_json["name"] = @resource[:name]
-    @updated_json["ip"] = @property_hash[:ip]
+    if @property_hash[:ensure] != :absent
+      if @node_json
+        @updated_json = @node_json.dup
+      else
+        @updated_json = default_node
+      end
+   
+      @property_hash.delete(:groups)
+      @node_properties.delete(:groups)
+   
+      # Update the node's JSON values based on any new params.  Sadly due to the
+      # structure of the JSON vs the flat nature of the puppet properties, this
+      # is a bit of a manual task.
+      @updated_json["hostgroup"]["name"] = @property_hash[:hostgroup]
+      @updated_json["name"] = @resource[:name]
+      @updated_json["id"] = @property_hash[:obj_id]
+      @updated_json["ip"] = @property_hash[:ip]
+    
+      @updated_json["hosttemplates"] = []
+      if @property_hash[:hosttemplates]
+        @property_hash[:hosttemplates].each do |ht|
+          @updated_json["hosttemplates"] << {:name => ht}
+        end
+      end
   
-    @updated_json["hosttemplates"] = []
-    if @property_hash[:hosttemplates]
-      @property_hash[:hosttemplates].each do |ht|
-        @updated_json["hosttemplates"] << {:name => ht}
+      @updated_json["servicechecks"] = []
+      if @property_hash[:servicechecks]
+        @property_hash[:servicechecks].each do |sc|
+          @updated_json["servicechecks"] << {:name => sc}
+        end
       end
-    end
+      
+      @updated_json["keywords"] = []
+      if @property_hash[:keywords]
+        @property_hash[:keywords].each do |kw|
+          @updated_json["keywords"] << {:name => kw}
+        end
+      end
+      
+      @updated_json["parents"] = []
+      if @property_hash[:parents]
+        @property_hash[:parents].each do |pa|
+          @updated_json["parents"] << {:name => pa}
+        end
+      end
+      
+      if not @property_hash[:monitored_by].to_s.empty?
+        @updated_json["monitored_by"]["name"] = @property_hash[:monitored_by]
+      end
 
-    @updated_json["servicechecks"] = []
-    if @property_hash[:servicechecks]
-      @property_hash[:servicechecks].each do |sc|
-        @updated_json["servicechecks"] << {:name => sc}
-      end
-    end
-    
-    @updated_json["keywords"] = []
-    if @property_hash[:keywords]
-      @property_hash[:keywords].each do |kw|
-        @updated_json["keywords"] << {:name => kw}
-      end
-    end
-    
-    @updated_json["parents"] = []
-    if @property_hash[:parents]
-      @property_hash[:parents].each do |pa|
-        @updated_json["parents"] << {:name => pa}
-      end
-    end
-    
-    if not @property_hash[:monitored_by].to_s.empty?
-      @updated_json["monitored_by"]["name"] = @property_hash[:monitored_by]
-    end
-  
-    put @updated_json.to_json
+      put @updated_json.to_json
 
-    @property_hash.clear
-    @node_properties.clear
-
+      @property_hash.clear
+      @node_properties.clear
+    end
     false
   end
 

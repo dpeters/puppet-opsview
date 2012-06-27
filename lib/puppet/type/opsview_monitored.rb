@@ -10,6 +10,10 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "True if you want an Opsview reload to be performed when the host is updated"
   end
 
+  newproperty(:obj_id) do
+    desc "Opsview's internal Object ID"
+  end
+
   newproperty(:hostgroup) do
     desc "Opsview hostgroup"
   end

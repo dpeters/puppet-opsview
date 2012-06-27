@@ -20,6 +20,13 @@ class Puppet::Provider::Opsview < Puppet::Provider
     @property_hash[:ensure] = :absent
   end
 
+  def destroy
+    @property_hash[:ensure] = :absent
+    unless @property_hash[:obj_id].nil?
+      delete_by_id @property_hash[:obj_id]
+    end
+  end
+
   def exists?
     @property_hash[:ensure] != :absent
   end
@@ -34,6 +41,31 @@ class Puppet::Provider::Opsview < Puppet::Provider
     url = [ config["url"], "config/#{@req_type.downcase}" ].join("/")
     begin
       response = RestClient.put url, body, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
+    rescue
+      raise Puppet::Error, "Error communicating with Opsview: " + $!
+    end
+
+    begin
+      responseJson = JSON.parse(response)
+    rescue
+      raise "Could not parse the JSON response from Opsview: " + response
+    end
+
+    begin
+      reload_opsview
+    rescue => e
+      raise "Was not able to reload Opsview: " + e
+    end
+  end
+
+  def delete_by_id(id)
+    self.class.delete_by_id(id)
+  end
+
+  def self.delete_by_id(id)
+    url = [ config["url"], "config/#{@req_type.downcase}", id ].join("/")
+    begin
+      response = RestClient.delete url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
     rescue
       raise Puppet::Error, "Error communicating with Opsview: " + $!
     end
