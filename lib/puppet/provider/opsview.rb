@@ -16,10 +16,6 @@ class Puppet::Provider::Opsview < Puppet::Provider
     end
   end
 
-  def delete
-    @property_hash[:ensure] = :absent
-  end
-
   def destroy
     @property_hash[:ensure] = :absent
     unless @property_hash[:obj_id].nil?
@@ -28,6 +24,9 @@ class Puppet::Provider::Opsview < Puppet::Provider
   end
 
   def exists?
+    if @property_hash.empty?
+      @property_hash[:ensure] = :absent
+    end
     @property_hash[:ensure] != :absent
   end
 

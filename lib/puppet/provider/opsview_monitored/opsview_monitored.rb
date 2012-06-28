@@ -51,7 +51,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :hosttemplates => node["hosttemplates"].collect{ |ht| ht["name"] },
           :keywords      => node["keywords"].collect{ |kw| kw["name"] },
           :full_json     => node,
-          :ensure        => :present }
+          :ensure        => node["ensure"] }
     # optional properties
     if defined? node["parents"]
       p[:parents] = node["parents"].collect{ |prnt| prnt["name"] }
