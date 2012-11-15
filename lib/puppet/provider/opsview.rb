@@ -7,6 +7,8 @@ end
 require 'yaml'
 
 class Puppet::Provider::Opsview < Puppet::Provider
+  @@errorOccurred = 0
+
   def create
     @property_hash[:ensure] = :present
     self.class.resource_type.validproperties.each do |property|
@@ -14,6 +16,15 @@ class Puppet::Provider::Opsview < Puppet::Provider
         @property_hash[property] = val
       end
     end
+  end
+
+  def errorOccurred
+    self.class.errorOccurred
+  end
+  
+  def self.errorOccurred
+    return true if @@errorOccurred > 0
+    return false
   end
 
   def delete
@@ -31,23 +42,34 @@ class Puppet::Provider::Opsview < Puppet::Provider
   end
 
   def self.put(body)
+    if @@errorOccurred > 0
+      Puppet.warning "put: Problem talking to Opsview server; ignoring Opsview config"
+      return
+    end
+
     url = [ config["url"], "config/#{@req_type.downcase}" ].join("/")
     begin
       response = RestClient.put url, body, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
     rescue
-      raise Puppet::Error, "Error communicating with Opsview: " + $!
+      @@errorOccurred = 1
+      Puppet.warning "Problem sending data to Opsview server; " + $!
+      return
     end
 
     begin
       responseJson = JSON.parse(response)
     rescue
-      raise "Could not parse the JSON response from Opsview: " + response
+      @@errorOccurred = 1
+      Puppet.warning "put_2: Problem talking to Opsview server; ignoring Opsview config - " + $!
+      return
     end
 
     begin
       reload_opsview
-    rescue => e
-      raise "Was not able to reload Opsview: " + e
+    rescue
+      @@errorOccurred = 1
+      Puppet.warning "Unable to reload Opsview server; " + $!
+      return
     end
   end
 
@@ -65,11 +87,11 @@ class Puppet::Provider::Opsview < Puppet::Provider
     begin
       conf = YAML.load_file(config_file)
     rescue
-      raise(Puppet::DevError, "Could not parse YAML configuration file " + config_file + " " + $!)
+      raise Puppet::ParseError, "Could not parse YAML configuration file " + config_file + " " + $!
     end
 
     if conf["username"].nil? or conf["password"].nil? or conf["url"].nil?
-      raise(Puppet::DevError, "Config file must contain URL, username, and password fields.")
+      raise Puppet::ParseError, "Config file must contain URL, username, and password fields."
     end
 
     conf
@@ -92,14 +114,18 @@ class Puppet::Provider::Opsview < Puppet::Provider
     begin
       response = RestClient.post url, post_body, :content_type => :json
     rescue
-      raise "Error communicating with Opsview: " + $!
+      @@errorOccurred = 1
+      Puppet.warning "Problem getting token from Opsview server; " + $!
+      return
     end
 
     case response.code
     when 200
       Puppet.debug "Response code: 200"
     else
-      raise "Was not able to login to Opsview to grab the token."
+      @@errorOccurred = 1
+      Puppet.warning "Unable to log in to Opsview server; HTTP code " + response.code
+      return
     end
 
     received_token = JSON.parse(response)['token']
@@ -113,10 +139,17 @@ class Puppet::Provider::Opsview < Puppet::Provider
   def self.reload_opsview
     url = [ config["url"], "reload" ].join("/")
 
+    if @@errorOccurred > 0
+      Puppet.warning "reload_opsview: Problem talking to Opsview server; ignoring Opsview config"
+      return
+    end
+
     begin
       response = RestClient.post url, '', :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
     rescue
-      raise "Error communicating with Opsview: " + $!
+      @@errorOccurred = 1
+      Puppet.warning "Unable to reload Opsview: " + $!
+      return
     end
 
     case response.code
@@ -127,7 +160,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
     when 409
       Puppet.info "Opsview reload already in progress"
     else
-      raise "Was not able to reload Opsview: " + response.code
+      raise "Was not able to reload Opsview: HTTP code: " + response.code
     end
   end
 
@@ -140,6 +173,11 @@ class Puppet::Provider::Opsview < Puppet::Provider
   end
 
   def self.get_resource(name = nil)
+    if @@errorOccurred > 0
+      Puppet.warning "get_resource: Problem talking to Opsview server; ignoring Opsview config"
+      return
+    end
+
     if name.nil?
       raise "Did not specify a node to look up."
     else
@@ -149,13 +187,14 @@ class Puppet::Provider::Opsview < Puppet::Provider
     begin
       response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all}
     rescue
-      raise "Error communicating with Opsview: " + $!
+      @@errorOccurred = 1
+      Puppet.warning "get_resource: Problem talking to Opsview server; ignoring Opsview config: " + $!
     end
 
     begin
       responseJson = JSON.parse(response)
     rescue
-      raise "Could not parse the JSON response from Opsview: " + response
+      raise Puppet::Error,"Could not parse the JSON response from Opsview: " + response
     end
 
     obj = responseJson['list'][0]
@@ -166,10 +205,16 @@ class Puppet::Provider::Opsview < Puppet::Provider
   def self.get_resources
     url = [ config["url"], "config/#{@req_type.downcase}" ].join("/")
 
+    if @@errorOccurred > 0
+       Puppet.warning "get_resources: Problem talking to Opsview server; ignoring Opsview config"
+      return
+    end
+
     begin
       response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all}
     rescue
-      raise "Error communicating with Opsview: " + $!
+      @@errorOccurred = 1
+      Puppet.warning "get_resource: Problem talking to Opsview server; ignoring Opsview config: " + $!
     end
 
     begin
