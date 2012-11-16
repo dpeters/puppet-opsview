@@ -52,7 +52,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
       response = RestClient.put url, body, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
     rescue
       @@errorOccurred = 1
-      Puppet.warning "Problem sending data to Opsview server; " + $!
+      Puppet.warning "put_1: Problem sending data to Opsview server; " + $!.inspect
       return
     end
 
@@ -60,7 +60,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
       responseJson = JSON.parse(response)
     rescue
       @@errorOccurred = 1
-      Puppet.warning "put_2: Problem talking to Opsview server; ignoring Opsview config - " + $!
+      Puppet.warning "put_2: Problem talking to Opsview server; ignoring Opsview config - " + $!.inspect
       return
     end
 
@@ -68,7 +68,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
       reload_opsview
     rescue
       @@errorOccurred = 1
-      Puppet.warning "Unable to reload Opsview server; " + $!
+      Puppet.warning "Unable to reload Opsview server; " + $!.inspect
       return
     end
   end
@@ -87,7 +87,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
     begin
       conf = YAML.load_file(config_file)
     rescue
-      raise Puppet::ParseError, "Could not parse YAML configuration file " + config_file + " " + $!
+      raise Puppet::ParseError, "Could not parse YAML configuration file " + config_file + " " + $!.inspect
     end
 
     if conf["username"].nil? or conf["password"].nil? or conf["url"].nil?
@@ -115,7 +115,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
       response = RestClient.post url, post_body, :content_type => :json
     rescue
       @@errorOccurred = 1
-      Puppet.warning "Problem getting token from Opsview server; " + $!
+      Puppet.warning "Problem getting token from Opsview server; " + $!.inspect
       return
     end
 
@@ -148,7 +148,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
       response = RestClient.post url, '', :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
     rescue
       @@errorOccurred = 1
-      Puppet.warning "Unable to reload Opsview: " + $!
+      Puppet.warning "Unable to reload Opsview: " + $!.inspect
       return
     end
 
@@ -188,7 +188,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
       response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all}
     rescue
       @@errorOccurred = 1
-      Puppet.warning "get_resource: Problem talking to Opsview server; ignoring Opsview config: " + $!
+      Puppet.warning "get_resource: Problem talking to Opsview server; ignoring Opsview config: " + $!.inspect
     end
 
     begin
@@ -214,7 +214,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
       response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all}
     rescue
       @@errorOccurred = 1
-      Puppet.warning "get_resource: Problem talking to Opsview server; ignoring Opsview config: " + $!
+      Puppet.warning "get_resource: Problem talking to Opsview server; ignoring Opsview config: " + $!.inspect
     end
 
     begin
