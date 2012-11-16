@@ -20,14 +20,6 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-#
-# NOTE:
-# When checking errorOccurred, use
-#   Puppet.warning "string"
-# instead of 
-#   raise Puppet::ParseError
-# so execution of puppet run continues
-#
 require File.join(File.dirname(__FILE__), '..', 'opsview')
 
 begin
@@ -51,10 +43,6 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
   mk_resource_methods
 
   def self.node_map(node)
-    if errorOccurred
-       Puppet.warning"Prefetch: Problem talking to Opsview server; ignoring Opsview config"
-       return
-    end
     p = { :name          => node["name"],
           :ip            => node["ip"],
           :hostgroup     => node["hostgroup"]["name"],
@@ -78,11 +66,6 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
 
   # Query the current resource state from Opsview
   def self.prefetch(resources)
-    if errorOccurred
-       Puppet.warning "Prefetch: Problem talking to Opsview server; ignoring Opsview config"
-       return
-    end
-
     instances.each do |provider|
       if node = resources[provider.name]
         node.provider = provider
@@ -91,11 +74,6 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
   end
 
   def self.instances
-    if errorOccurred
-       Puppet.warning "Instances: Problem talking to Opsview server; ignoring Opsview config"
-       return
-    end
-
     providers = []
 
     # Retrieve all nodes.  Expensive query.
@@ -110,11 +88,6 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
 
   # Apply the changes to Opsview
   def flush
-    if errorOccurred
-       Puppet.warning "Flush: Problem talking to Opsview server; ignoring Opsview config"
-       return
-    end
-
     if @node_json
       @updated_json = @node_json.dup
     else
@@ -174,12 +147,6 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
   def initialize(*args)
     super
 
-    if errorOccurred
-       # Do not raise here, just report and return
-       Puppet.warning "Initialize: Problem talking to Opsview server; ignoring Opsview config"
-       return
-    end
-
     # Save the JSON for the node if it's present in the arguments
     if args[0].class == Hash and args[0].has_key?(:full_json)
       @node_json = args[0][:full_json]
@@ -214,19 +181,11 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
 
   # Return the current state of the node in Opsview.
   def node_properties
-    if errorOccurred
-       Puppet.warning "Properties: Problem talking to Opsview server; ignoring Opsview config"
-       return
-    end
     @node_properties.dup
   end
 
   # Return (and look up if necessary) the desired state.
   def properties
-    if errorOccurred
-       Puppet.warning "Properties: Problem talking to Opsview server; ignoring Opsview config"
-       return
-    end
     if @property_hash.empty?
       @property_hash = query || {:ensure => :absent}
       if @property_hash.empty?
@@ -237,10 +196,6 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
   end
 
   def default_node
-    if errorOccurred
-       Puppet.warning "default_node: Problem talking to Opsview server; ignoring Opsview config"
-       return
-    end
     json = '
      {
        "flap_detection_enabled" : "1",
