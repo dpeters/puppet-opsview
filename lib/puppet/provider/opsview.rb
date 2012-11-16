@@ -144,6 +144,8 @@ class Puppet::Provider::Opsview < Puppet::Provider
       return
     end
 
+    Puppet.notice "Performing Opsview reload"
+
     begin
       response = RestClient.post url, '', :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
     rescue
