@@ -3,4 +3,4 @@ author 'Christian Paredes <christian.paredes@sbri.org>, Devon Peters <devon.pete
 description 'Puppet module for installing Opsview Puppet libraries that manage Opsview objects, such as hosts, servicechecks, servicegroups, etc.'
 source 'https://github.com/dpeters/puppet-opsview'
 project_page 'https://github.com/dpeters/puppet-opsview'
-version '0.3.0'
+version '0.3.1'
