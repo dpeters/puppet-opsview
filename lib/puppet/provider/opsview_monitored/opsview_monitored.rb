@@ -49,6 +49,10 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :servicechecks => node["servicechecks"].collect{ |sc| sc["name"] },
           :hosttemplates => node["hosttemplates"].collect{ |ht| ht["name"] },
           :keywords      => node["keywords"].collect{ |kw| kw["name"] },
+          :enable_snmp   => node["enable_snmp"],
+          :snmp_community   => node["snmp_community"],
+          :snmp_version   => node["snmp_version"],
+          :snmp_port   => node["snmp_port"],
           :full_json     => node,
           :ensure        => :present }
     # optional properties
@@ -103,6 +107,11 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     @updated_json["hostgroup"]["name"] = @property_hash[:hostgroup]
     @updated_json["name"] = @resource[:name]
     @updated_json["ip"] = @property_hash[:ip]
+
+    @updated_json["enable_snmp"] = @property_hash[:enable_snmp]
+    @updated_json["snmp_community"] = @property_hash[:snmp_community]
+    @updated_json["snmp_version"] = @property_hash[:snmp_version]
+    @updated_json["snmp_port"] = @property_hash[:snmp_port]
   
     @updated_json["hosttemplates"] = []
     if @property_hash[:hosttemplates]

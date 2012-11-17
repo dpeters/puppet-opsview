@@ -38,6 +38,22 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "Array of parents for this node"
   end
 
+  newproperty(:enable_snmp) do
+    desc "Whether not the SNMP is enabled for the host"
+  end
+
+  newproperty(:snmp_community) do
+    desc "SNMP community string for SNMP protocol 1 and 2c"
+  end
+
+  newproperty(:snmp_version) do
+    desc "SNMP protocol version"
+  end
+
+  newproperty(:snmp_port) do
+    desc "SNMP port"
+  end
+
   autorequire(:opsview_hostgroup) do
     [self[:hostgroup]]
   end
