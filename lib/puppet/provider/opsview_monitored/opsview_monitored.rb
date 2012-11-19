@@ -226,6 +226,15 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
   
     put @updated_json.to_json
 
+    if defined? @resource[:reload_opsview]
+      if @resource[:reload_opsview].to_s == "1"
+        Puppet.notice "Configured to reload opsview"
+        do_reload_opsview
+      else
+        Puppet.notice "Configured NOT to reload opsview"
+      end
+    end
+
     @property_hash.clear
     @node_properties.clear
 

@@ -98,6 +98,15 @@ Puppet::Type.type(:opsview_hostgroup).provide :opsview, :parent => Puppet::Provi
     # Flush changes:
     put @updated_json.to_json
 
+    if defined? @resource[:reload_opsview]
+      if @resource[:reload_opsview].to_s == "1"
+        Puppet.notice "Configured to reload opsview"
+        do_reload_opsview
+      else
+        Puppet.notice "Configured NOT to reload opsview"
+      end
+    end
+
     @property_hash.clear
     @hostgroup_properties.clear
 
