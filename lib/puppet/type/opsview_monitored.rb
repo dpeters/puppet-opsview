@@ -39,7 +39,7 @@ Puppet::Type.newtype(:opsview_monitored) do
   end
 
   newproperty(:enable_snmp) do
-    desc "Whether not the SNMP is enabled for the host"
+    desc "Whether or not SNMP is enabled for the host"
   end
 
   newproperty(:snmp_community) do
@@ -108,6 +108,10 @@ Puppet::Type.newtype(:opsview_monitored) do
     newvalue :"level3"
   
     defaultto :off
+  end
+
+  newproperty(:snmp_extended_throughput_data) do
+    desc "Whether or not to gather extended data from interfaces (the unicast, multicasdt, broadcast stats)"
   end
 
   autorequire(:opsview_hostgroup) do

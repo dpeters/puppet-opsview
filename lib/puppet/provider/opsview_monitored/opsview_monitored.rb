@@ -59,6 +59,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :snmpv3_privprotocol => node["snmpv3_privprotocol"],
           :snmpv3_username => node["snmpv3_username"],
           :tidy_ifdescr_level => node["tidy_ifdescr_level"],
+          :snmp_extended_throughput_data => node["snmp_extended_throughput_data"],
           :full_json     => node,
           :ensure        => :present }
           
@@ -188,6 +189,8 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
       when "level3" then
         @updated_json["tidy_ifdescr_level"] = 3
     end
+
+    @updated_json["snmp_extended_throughput_data"] = @property_hash[:snmp_extended_throughput_data]
 
     @updated_json["hosttemplates"] = []
     if @property_hash[:hosttemplates]
@@ -319,6 +322,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
        "nmis_node_type" : "router",
        "snmp_version" : "2c",
        "snmp_max_msg_size" : "default",
+       "snmp_extended_throughput_data" : "0",
        "tidy_ifdescr_level" : "off",
        "snmpv3_authpassword" : "",
        "use_nmis" : "0",
