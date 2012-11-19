@@ -58,6 +58,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :snmpv3_privpassword => node["snmpv3_privpassword"],
           :snmpv3_privprotocol => node["snmpv3_privprotocol"],
           :snmpv3_username => node["snmpv3_username"],
+          :tidy_ifdescr_level => node["tidy_ifdescr_level"],
           :full_json     => node,
           :ensure        => :present }
           
@@ -91,6 +92,18 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           p[:snmp_max_msg_size] = "32Kio"
         when "65535" then 
           p[:snmp_max_msg_size] = "64Kio"
+      end
+    end
+    if defined? node["tidy_ifdescr_level"]
+      case node["tidy_ifdescr_level"].to_s
+        when "0" then
+          p[:tidy_ifdescr_level] = "off"
+        when "1" then 
+          p[:tidy_ifdescr_level] = "level1"
+        when "2" then 
+          p[:tidy_ifdescr_level] = "level2"
+        when "3" then 
+          p[:tidy_ifdescr_level] = "level3"
       end
     end
     p
@@ -163,6 +176,17 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
         @updated_json["snmp_max_msg_size"] = 32767
       when "64Kio" then 
         @updated_json["snmp_max_msg_size"] = 65535
+    end
+
+    case @property_hash[:tidy_ifdescr_level].to_s
+      when "off" then
+        @updated_json["tidy_ifdescr_level"] = 0
+      when "level1" then
+        @updated_json["tidy_ifdescr_level"] = 1
+      when "level2" then
+        @updated_json["tidy_ifdescr_level"] = 2
+      when "level3" then
+        @updated_json["tidy_ifdescr_level"] = 3
     end
 
     @updated_json["hosttemplates"] = []
@@ -295,6 +319,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
        "nmis_node_type" : "router",
        "snmp_version" : "2c",
        "snmp_max_msg_size" : "default",
+       "tidy_ifdescr_level" : "off",
        "snmpv3_authpassword" : "",
        "use_nmis" : "0",
        "rancid_connection_type" : "ssh",

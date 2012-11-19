@@ -99,6 +99,17 @@ Puppet::Type.newtype(:opsview_monitored) do
     defaultto :default
   end
 
+  newproperty(:tidy_ifdescr_level) do
+    desc "Set level of removing common words from ifDescr strings"
+
+    newvalue :off
+    newvalue :"level1"
+    newvalue :"level2"
+    newvalue :"level3"
+  
+    defaultto :off
+  end
+
   autorequire(:opsview_hostgroup) do
     [self[:hostgroup]]
   end
