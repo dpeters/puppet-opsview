@@ -54,6 +54,51 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "SNMP port"
   end
 
+  newproperty(:snmpv3_username) do
+    desc "SNMP v3 username"
+  end
+
+  newproperty(:snmpv3_authpassword) do
+    desc "SNMP v3 Auth Password (should be 8 chars)"
+  end
+
+  newproperty(:snmpv3_authprotocol) do
+    desc "SNMP v3 Auth Protocol (md5 or sha)"
+
+    newvalue :md5
+    newvalue :sha
+
+    defaultto :md5
+  end
+
+  newproperty(:snmpv3_privpassword) do
+    desc "SNMP v3 Priv Password (should be 8 chars)"
+  end
+
+  newproperty(:snmpv3_privprotocol) do
+    desc "SNMP v3 Priv Protocol (des, aes or aes128)"
+
+    newvalue :des
+    newvalue :aes
+    newvalue :aes128
+
+    defaultto :des
+  end
+
+  newproperty(:snmp_max_msg_size) do
+    desc "SNMP message size (default, 1Kio, 2Kio, 4Kio, 8Kio, 16Kio, 42Kio, 64Kio)"
+    newvalue :default
+    newvalue :"1Kio"
+    newvalue :"2Kio"
+    newvalue :"4Kio"
+    newvalue :"8Kio"
+    newvalue :"16Kio"
+    newvalue :"32Kio"
+    newvalue :"64Kio"
+
+    defaultto :default
+  end
+
   autorequire(:opsview_hostgroup) do
     [self[:hostgroup]]
   end
