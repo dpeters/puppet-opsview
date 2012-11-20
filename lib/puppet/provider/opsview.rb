@@ -63,14 +63,6 @@ class Puppet::Provider::Opsview < Puppet::Provider
       Puppet.warning "put_2: Problem talking to Opsview server; ignoring Opsview config - " + $!.inspect
       return
     end
-
-    begin
-      reload_opsview
-    rescue
-      @@errorOccurred = 1
-      Puppet.warning "Unable to reload Opsview server; " + $!.inspect
-      return
-    end
   end
 
   def config
@@ -132,11 +124,11 @@ class Puppet::Provider::Opsview < Puppet::Provider
     received_token
   end
 
-  def reload_opsview
-    self.class.reload_opsview
+  def do_reload_opsview
+    self.class.do_reload_opsview
   end
 
-  def self.reload_opsview
+  def self.do_reload_opsview
     url = [ config["url"], "reload" ].join("/")
 
     if @@errorOccurred > 0
