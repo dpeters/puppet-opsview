@@ -114,6 +114,10 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "Whether or not to gather extended data from interfaces (the unicast, multicasdt, broadcast stats)"
   end
 
+  newproperty(:icon_name) do
+    desc "Icon to set for the device)"
+  end
+
   autorequire(:opsview_hostgroup) do
     [self[:hostgroup]]
   end
