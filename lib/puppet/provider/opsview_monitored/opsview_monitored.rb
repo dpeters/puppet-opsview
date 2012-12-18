@@ -60,6 +60,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :snmpv3_username => node["snmpv3_username"],
           :tidy_ifdescr_level => node["tidy_ifdescr_level"],
           :snmp_extended_throughput_data => node["snmp_extended_throughput_data"],
+          :icon_name => node["icon"]["name"],
           :full_json     => node,
           :ensure        => :present }
           
@@ -191,6 +192,8 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     end
 
     @updated_json["snmp_extended_throughput_data"] = @property_hash[:snmp_extended_throughput_data]
+
+    @updated_json["icon"]["name"] = @property_hash[:icon_name]
 
     @updated_json["hosttemplates"] = []
     if @property_hash[:hosttemplates]
