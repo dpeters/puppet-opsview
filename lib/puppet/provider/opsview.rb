@@ -63,6 +63,9 @@ class Puppet::Provider::Opsview < Puppet::Provider
       Puppet.warning "put_2: Problem talking to Opsview server; ignoring Opsview config - " + $!.inspect
       return
     end
+
+    # if we get here, all should be ok, so make sure we mark as such.
+    @@errorOccurred = 0
   end
 
   def config
