@@ -52,7 +52,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
       response = RestClient.put url, body, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
     rescue
       @@errorOccurred = 1
-      Puppet.warning "put_1: Problem sending data to Opsview server; " + $!.inspect
+      Puppet.warning "put_1: Problem sending data to Opsview server; " + $!.inspect + "\n====\n" + url + "\n====\n" + body
       return
     end
 
@@ -63,6 +63,9 @@ class Puppet::Provider::Opsview < Puppet::Provider
       Puppet.warning "put_2: Problem talking to Opsview server; ignoring Opsview config - " + $!.inspect
       return
     end
+
+    # if we get here, all should be ok, so make sure we mark as such.
+    @@errorOccurred = 0
   end
 
   def config
