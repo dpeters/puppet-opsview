@@ -155,11 +155,26 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     @updated_json["snmp_community"] = @property_hash[:snmp_community]
     @updated_json["snmp_version"] = @property_hash[:snmp_version]
     @updated_json["snmp_port"] = @property_hash[:snmp_port]
-    @updated_json["snmpv3_authpassword"] = @property_hash[:snmpv3_authpassword]
-    @updated_json["snmpv3_authprotocol"] = @property_hash[:snmpv3_authprotocol]
-    @updated_json["snmpv3_privpassword"] = @property_hash[:snmpv3_privpassword]
-    @updated_json["snmpv3_privprotocol"] = @property_hash[:snmpv3_privprotocol]
-    @updated_json["snmpv3_username"] = @property_hash[:snmpv3_username]
+
+    if not @property_hash[:snmpv3_authpassword].to_s.empty?
+      @updated_json["snmpv3_authpassword"] = @property_hash[:snmpv3_authpassword]
+    end
+
+    if not  @property_hash[:snmpv3_authprotocol].to_s.empty?
+      @updated_json["snmpv3_authprotocol"] = @property_hash[:snmpv3_authprotocol]
+    end
+
+    if not  @property_hash[:snmpv3_privpassword].to_s.empty?
+      @updated_json["snmpv3_privpassword"] = @property_hash[:snmpv3_privpassword]
+    end
+
+    if not  @property_hash[:snmpv3_privprotocol].to_s.empty?
+      @updated_json["snmpv3_privprotocol"] = @property_hash[:snmpv3_privprotocol]
+    end
+
+    if not  @property_hash[:snmpv3_usernamesnmpv3_authprotocol].to_s.empty?
+      @updated_json["snmpv3_username"] = @property_hash[:snmpv3_username]
+    end
 
     case @property_hash[:snmp_max_msg_size].to_s
       when "default" then 
@@ -191,9 +206,13 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
         @updated_json["tidy_ifdescr_level"] = 3
     end
 
-    @updated_json["snmp_extended_throughput_data"] = @property_hash[:snmp_extended_throughput_data]
+    if not@property_hash[:snmp_extended_throughput_data].to_s.empty?
+      @updated_json["snmp_extended_throughput_data"] = @property_hash[:snmp_extended_throughput_data]
+    end
 
-    @updated_json["icon"]["name"] = @property_hash[:icon_name]
+    if not @property_hash[:icon_name].to_s.empty?
+      @updated_json["icon"]["name"] = @property_hash[:icon_name]
+    end
 
     @updated_json["hosttemplates"] = []
     if @property_hash[:hosttemplates]
