@@ -47,12 +47,12 @@ class Puppet::Provider::Opsview < Puppet::Provider
       return
     end
 
-    url = [ config["url"], "config/#{@req_type.downcase}" ].join("&")
+    url = [ config["url"], "config/#{@req_type.downcase}" ].join("/")
     begin
       response = RestClient.put url, body, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
     rescue
       @@errorOccurred = 1
-      Puppet.warning "put_1: Problem sending data to Opsview server; " + $!.inspect + "\n====\n" + body
+      Puppet.warning "put_1: Problem sending data to Opsview server; " + $!.inspect + "\n====\n" + url + "\n====\n" + body
       return
     end
 
