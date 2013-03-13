@@ -73,10 +73,12 @@ class Puppet::Provider::Opsview < Puppet::Provider
   end
 
   def self.config
+    Puppet.debug "Accessing config"
     @config ||= get_config
   end
 
   def self.get_config
+    Puppet.debug "Loading in Opsview configuration"
     config_file = "/etc/puppet/opsview.conf"
     # Load the Opsview config
     begin
@@ -97,14 +99,24 @@ class Puppet::Provider::Opsview < Puppet::Provider
   end
 
   def self.token
+    Puppet.debug "Accessing token"
     @token ||= get_token
   end
 
   def self.get_token
+    Puppet.debug "Fetching Opsview token"
     post_body = { "username" => config["username"],
                   "password" => config["password"] }.to_json
 
     url = [ config["url"], "login" ].join("/")
+
+    Puppet.debug "Using Opsview url: "+url
+    Puppet.debug "using post: username:"+config["username"]+" password:"+config["password"].gsub(/\w/,'x')
+
+    if Puppet[:debug]
+      Puppet.debug "Logging RestClient calls to: /tmp/puppet_restclient.log"
+      RestClient.log='/tmp/puppet_restclient.log'
+    end
 
     begin
       response = RestClient.post url, post_body, :content_type => :json
@@ -124,6 +136,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
     end
 
     received_token = JSON.parse(response)['token']
+    Puppet.debug "Got token: "+received_token
     received_token
   end
 
