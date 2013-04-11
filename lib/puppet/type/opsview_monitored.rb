@@ -44,26 +44,32 @@ Puppet::Type.newtype(:opsview_monitored) do
 
   newproperty(:enable_snmp) do
     desc "Whether or not SNMP is enabled for the host"
+    defaultto "0" 
   end
 
   newproperty(:snmp_community) do
     desc "SNMP community string for SNMP protocol 1 and 2c"
+    defaultto "public" 
   end
 
   newproperty(:snmp_version) do
     desc "SNMP protocol version"
+    defaultto "3" 
   end
 
   newproperty(:snmp_port) do
     desc "SNMP port"
+    defaultto "161" 
   end
 
   newproperty(:snmpv3_username) do
     desc "SNMP v3 username"
+    defaultto ""
   end
 
   newproperty(:snmpv3_authpassword) do
     desc "SNMP v3 Auth Password (should be 8 chars)"
+    defaultto ""
   end
 
   newproperty(:snmpv3_authprotocol) do
@@ -77,6 +83,7 @@ Puppet::Type.newtype(:opsview_monitored) do
 
   newproperty(:snmpv3_privpassword) do
     desc "SNMP v3 Priv Password (should be 8 chars)"
+    defaultto ""
   end
 
   newproperty(:snmpv3_privprotocol) do
