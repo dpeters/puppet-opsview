@@ -8,6 +8,7 @@ Puppet::Type.newtype(:opsview_hosttemplate) do
   
   newparam(:reload_opsview) do
     desc "True if you want an Opsview reload to be performed when the hosttemplate is updated"
+    defaultto :false
   end
   
   newproperty(:hosttemplate) do

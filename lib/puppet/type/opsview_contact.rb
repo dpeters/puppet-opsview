@@ -8,6 +8,7 @@ Puppet::Type.newtype(:opsview_contact) do
   newparam(:reload_opsview) do
     desc "True if you want an Opsview reload to be performed when the
       contact is updated"
+    defaultto :false
   end
   newproperty(:fullname) do
     desc "Full name of the user"
