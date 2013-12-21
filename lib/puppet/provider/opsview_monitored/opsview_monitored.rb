@@ -61,6 +61,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :tidy_ifdescr_level => node["tidy_ifdescr_level"],
           :snmp_extended_throughput_data => node["snmp_extended_throughput_data"],
           :icon_name => node["icon"]["name"],
+          :check_command => node["check_command"],
           :notification_interval => node["notification_interval"],
           :full_json     => node,
           :ensure        => :present }
@@ -176,6 +177,10 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
 
     if not  @property_hash[:snmpv3_usernamesnmpv3_authprotocol].to_s.empty?
       @updated_json["snmpv3_username"] = @property_hash[:snmpv3_username]
+    end
+
+    if not  @property_hash[:check_command].to_s.empty?
+      @updated_json["check_command"]["name"] = @property_hash[:check_command]
     end
 
     case @property_hash[:snmp_max_msg_size].to_s

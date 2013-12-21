@@ -122,6 +122,10 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "Icon to set for the device)"
   end
 
+  newproperty(:check_command) do
+    desc "Host check command"
+  end
+
   autorequire(:opsview_hostgroup) do
     [self[:hostgroup]]
   end
