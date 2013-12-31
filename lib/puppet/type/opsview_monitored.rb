@@ -126,6 +126,18 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "Host check command"
   end
 
+  newproperty(:hostattributes, :array_matching => :all) do
+    desc "Array of host attribute key pairs for this node"
+
+    def should_to_s(newvalue)
+      newvalue.inspect
+    end
+
+    def is_to_s(currentvalue)
+      currentvalue.inspect
+    end
+  end
+
   autorequire(:opsview_hostgroup) do
     [self[:hostgroup]]
   end
