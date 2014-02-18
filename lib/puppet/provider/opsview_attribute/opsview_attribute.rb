@@ -45,20 +45,20 @@ Puppet::Type.type(:opsview_attribute).provide :opsview, :parent => Puppet::Provi
           :ensure    => :present }
 
     # optional properties
-    if defined? attribute["value"]["name"]
-      p[:value] = attribute["value"]["name"]
+    if defined? attribute["value"]
+      p[:value] = attribute["value"]
     end
-    if defined? attribute["arg1"]["name"]
-      p[:arg1] = attribute["arg1"]["name"]
+    if defined? attribute["arg1"]
+      p[:arg1] = attribute["arg1"]
     end
-    if defined? attribute["arg2"]["name"]
-      p[:arg2] = attribute["arg2"]["name"]
+    if defined? attribute["arg2"]
+      p[:arg2] = attribute["arg2"]
     end
-    if defined? attribute["arg3"]["name"]
-      p[:arg3] = attribute["arg3"]["name"]
+    if defined? attribute["arg3"]
+      p[:arg3] = attribute["arg3"]
     end
-    if defined? attribute["arg4"]["name"]
-      p[:arg4] = attribute["arg4"]["name"]
+    if defined? attribute["arg4"]
+      p[:arg4] = attribute["arg4"]
     end
 
     p
