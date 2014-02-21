@@ -49,6 +49,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :servicechecks => node["servicechecks"].collect{ |sc| sc["name"] },
           :hosttemplates => node["hosttemplates"].collect{ |ht| ht["name"] },
           :keywords      => node["keywords"].collect{ |kw| kw["name"] },
+          :hostattributes => node["hostattributes"],
           :enable_snmp   => node["enable_snmp"],
           :snmp_community   => node["snmp_community"],
           :snmp_version   => node["snmp_version"],
@@ -61,6 +62,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :tidy_ifdescr_level => node["tidy_ifdescr_level"],
           :snmp_extended_throughput_data => node["snmp_extended_throughput_data"],
           :icon_name => node["icon"]["name"],
+          :check_command => node["check_command"]["name"],
           :notification_interval => node["notification_interval"],
           :full_json     => node,
           :ensure        => :present }
@@ -73,6 +75,9 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     end
     if defined? node["keywords"]
       p[:keywords] = node["keywords"].collect{ |kw| kw["name"] }
+    end
+    if defined? node["hostattributes"]
+      p[:hostattributes] = node["hostattributes"].collect{ |ha| {"name" => ha["name"], "value" => ha["value"]} }
     end
     if defined? node["monitored_by"]["name"]
       p[:monitored_by] = node["monitored_by"]["name"]
@@ -178,6 +183,10 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
       @updated_json["snmpv3_username"] = @property_hash[:snmpv3_username]
     end
 
+    if not  @property_hash[:check_command].to_s.empty?
+      @updated_json["check_command"]["name"] = @property_hash[:check_command]
+    end
+
     case @property_hash[:snmp_max_msg_size].to_s
       when "default" then 
         @updated_json["snmp_max_msg_size"] = 0
@@ -227,6 +236,13 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     if @property_hash[:servicechecks]
       @property_hash[:servicechecks].each do |sc|
         @updated_json["servicechecks"] << {:name => sc}
+      end
+    end
+
+    @updated_json["hostattributes"] = []
+    if @property_hash[:hostattributes]
+      @property_hash[:hostattributes].each do |ha_hash|
+        @updated_json["hostattributes"] << {:name => ha_hash["name"], :value => ha_hash["value"]}
       end
     end
     

@@ -27,11 +27,13 @@ Prerequisites
 Puppet Types in this Module
 ===========================
 
+* opsview_attribute
 * opsview_contact
 * opsview_hostgroup
 * opsview_hosttemplate
 * opsview_keyword
 * opsview_monitored
+* opsview_notificationmethod
 * opsview_role
 * opsview_servicecheck
 * opsview_servicegroup
