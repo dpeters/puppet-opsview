@@ -49,8 +49,11 @@ methods we don't need (there's lots of duplication.)
 
 3. Add default providers so that Puppet runs don't fail when there's no rest-client / json gems to use.
 
-Authors
+Contributors
 =======
 
 * Devon Peters &lt;devon.peters@gmail.com&gt;
 * Christian Paredes &lt;christian.paredes@sbri.org&gt;
+* Duncan Ferguson &lt;duncs&gt;
+* Amos Shapira &lt;amosshapira&gt;
+* John Kinsella &lt;jlk&gt;
