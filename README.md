@@ -2,7 +2,7 @@ Stable release download
 =======================
 
 If you're looking for stable releases, you can download this module at
-the [Puppet Forge](http://forge.puppetlabs.com/users/cparedes/modules/puppet_opsview).
+the [Puppet Forge](http://forge.puppetlabs.com/devon/opsview).
 
 Introduction
 =============
