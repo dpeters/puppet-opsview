@@ -19,13 +19,17 @@ Puppet::Type.newtype(:opsview_hosttemplate) do
   end
   
   newproperty(:servicechecks, :array_matching => :all) do
-    desc "Array of servicechecks for this hosttemplate.  The list must be in
-          alphabetical order, otherwise the config will be re-applied everytime
-          puppet runs."
+    desc "Array of servicechecks for this hosttemplate."
+    def insync?(is)
+      is.sort == should.sort
+    end
   end
 
   newproperty(:managementurls, :array_matching => :all) do
     desc "Array of management urls for this hosttemplate"
+    def insync?(is)
+      is.sort == should.sort
+    end
   end
   
   autorequire(:opsview_servicecheck) do

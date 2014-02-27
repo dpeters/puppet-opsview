@@ -20,14 +20,23 @@ Puppet::Type.newtype(:opsview_monitored) do
 
   newproperty(:hosttemplates, :array_matching => :all) do
     desc "Array of Opsview host templates that should be applied to this node"
+    def insync?(is)
+      is.sort == should.sort
+    end
   end
 
   newproperty(:servicechecks, :array_matching => :all) do
     desc "Array of Opsview service checks that should be applied to this node"
+    def insync?(is)
+      is.sort == should.sort
+    end
   end
   
   newproperty(:keywords, :array_matching => :all) do
     desc "Array of Opsview keywords should be applied to this node"
+    def insync?(is)
+      is.sort == should.sort
+    end
   end
   
   newproperty(:monitored_by) do
@@ -40,6 +49,9 @@ Puppet::Type.newtype(:opsview_monitored) do
   
   newproperty(:parents, :array_matching => :all) do
     desc "Array of parents for this node"
+    def insync?(is)
+      is.sort == should.sort
+    end
   end
 
   newproperty(:enable_snmp) do
@@ -119,7 +131,7 @@ Puppet::Type.newtype(:opsview_monitored) do
   end
 
   newproperty(:icon_name) do
-    desc "Icon to set for the device)"
+    desc "Icon to set for the device"
   end
 
   newproperty(:check_command) do
@@ -135,6 +147,10 @@ Puppet::Type.newtype(:opsview_monitored) do
 
     def is_to_s(currentvalue)
       currentvalue.inspect
+    end
+
+    def insync?(is)
+      is.sort == should.sort
     end
   end
 

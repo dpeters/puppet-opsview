@@ -18,9 +18,15 @@ Puppet::Type.newtype(:opsview_servicecheck) do
   end
   newproperty(:dependencies, :array_matching => :all) do
     desc "Array of dependencies for this servicecheck"
+    def insync?(is)
+      is.sort == should.sort
+    end
   end
   newproperty(:keywords, :array_matching => :all) do
     desc "Array of keywords for this servicecheck"
+    def insync?(is)
+      is.sort == should.sort
+    end
   end
   
   [:check_period, :check_interval, :check_attempts, :retry_check_interval,
