@@ -54,7 +54,7 @@ Puppet::Type.newtype(:opsview_role) do
       end
     end
   end
-  newproperty(:access_hostrgroups, :array_matching => :all) do
+  newproperty(:access_hostgroups, :array_matching => :all) do
     desc "Array of hostgroups that this role can access."
   end
   newproperty(:access_servicegroups, :array_matching => :all) do
