@@ -47,12 +47,21 @@ Puppet::Type.newtype(:opsview_keyword) do
   end
   newproperty(:hosts, :array_matching => :all) do
     desc "Array of hosts to apply this keyword to"
+    def insync?(is)
+      is.sort == should.sort
+    end
   end
   newproperty(:servicechecks, :array_matching => :all) do
     desc "Array of servicechecks to apply this keyword to"
+    def insync?(is)
+      is.sort == should.sort
+    end
   end
   newproperty(:roles, :array_matching => :all) do
     desc "Array of roles which can view this keyword"
+    def insync?(is)
+      is.sort == should.sort
+    end
   end
   
   autorequire(:opsview_servicecheck) do
