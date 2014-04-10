@@ -113,7 +113,7 @@ Puppet::Type.type(:opsview_notificationmethod).provide :opsview, :parent => Pupp
     put @updated_json.to_json
 
     if defined? @resource[:reload_opsview]
-      if @resource[:reload_opsview].to_s == "1"
+      if @resource[:reload_opsview].to_s == "true"
         Puppet.notice "Configured to reload opsview"
         do_reload_opsview
       else

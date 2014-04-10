@@ -8,6 +8,7 @@ Puppet::Type.newtype(:opsview_monitored) do
 
   newparam(:reload_opsview) do
     desc "True if you want an Opsview reload to be performed when the host is updated"
+    defaultto :false
   end
 
   newproperty(:hostgroup) do

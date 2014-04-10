@@ -8,6 +8,7 @@ Puppet::Type.newtype(:opsview_servicecheck) do
   newparam(:reload_opsview) do
     desc "True if you want an Opsview reload to be performed when the
           servicecheck is updated"
+    defaultto :false
   end
   newproperty(:description) do
     desc "Short description for the servicecheck"

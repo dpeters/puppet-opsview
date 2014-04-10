@@ -9,6 +9,7 @@ Puppet::Type.newtype(:opsview_notificationmethod) do
   newparam(:reload_opsview) do
     desc "True if you want an Opsview reload to be performed when the
           notificationmethod is updated"
+    defaultto :false
   end
   
   newproperty(:master) do

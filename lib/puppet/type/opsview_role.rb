@@ -8,6 +8,7 @@ Puppet::Type.newtype(:opsview_role) do
   newparam(:reload_opsview) do
     desc "True if you want an Opsview reload to be performed when the
       role is updated."
+    defaultto :false
   end
   newproperty(:role) do
     desc "The name of this role."

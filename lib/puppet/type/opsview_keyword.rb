@@ -8,6 +8,7 @@ Puppet::Type.newtype(:opsview_keyword) do
   newparam(:reload_opsview) do
     desc "True if you want an Opsview reload to be performed when the
       keyword is updated."
+    defaultto :false
   end
   newproperty(:keyword) do
     desc "The name of this keyword."
