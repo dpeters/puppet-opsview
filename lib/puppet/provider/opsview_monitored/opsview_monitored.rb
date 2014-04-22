@@ -62,13 +62,10 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :tidy_ifdescr_level => node["tidy_ifdescr_level"],
           :snmp_extended_throughput_data => node["snmp_extended_throughput_data"],
           :icon_name => node["icon"]["name"],
-          :check_command => node["check_command"]["name"],
           :notification_interval => node["notification_interval"],
           :full_json     => node,
           :ensure        => :present }
           
-#:snmp_max_msg_size => node["snmp_max_msg_size"],
-
     # optional properties
     if defined? node["parents"]
       p[:parents] = node["parents"].collect{ |prnt| prnt["name"] }
@@ -81,6 +78,9 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     end
     if defined? node["monitored_by"]["name"]
       p[:monitored_by] = node["monitored_by"]["name"]
+    end
+    if defined? node["check_command"]["name"]
+      p[:check_command] = node["check_command"]["name"]
     end
     if defined? node["snmp_max_msg_size"]
       case node["snmp_max_msg_size"].to_s
