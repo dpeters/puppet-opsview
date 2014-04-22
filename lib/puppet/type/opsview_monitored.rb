@@ -21,6 +21,7 @@ Puppet::Type.newtype(:opsview_monitored) do
 
   newproperty(:hosttemplates, :array_matching => :all) do
     desc "Array of Opsview host templates that should be applied to this node"
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
@@ -28,6 +29,7 @@ Puppet::Type.newtype(:opsview_monitored) do
 
   newproperty(:servicechecks, :array_matching => :all) do
     desc "Array of Opsview service checks that should be applied to this node"
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
@@ -35,6 +37,7 @@ Puppet::Type.newtype(:opsview_monitored) do
   
   newproperty(:keywords, :array_matching => :all) do
     desc "Array of Opsview keywords should be applied to this node"
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
@@ -46,10 +49,12 @@ Puppet::Type.newtype(:opsview_monitored) do
 
   newproperty(:notification_interval) do
     desc "Host notification interval"
+    defaultto '0'
   end
   
   newproperty(:parents, :array_matching => :all) do
     desc "Array of parents for this node"
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
@@ -148,6 +153,7 @@ Puppet::Type.newtype(:opsview_monitored) do
 
   newproperty(:hostattributes, :array_matching => :all) do
     desc "Array of host attribute key pairs for this node"
+    defaultto []
 
     def should_to_s(newvalue)
       newvalue.inspect

@@ -56,12 +56,14 @@ Puppet::Type.newtype(:opsview_contact) do
   #       and 24x7) it should work.
   newproperty(:notificationmethods8x5, :array_matching => :all) do
     desc "An array of notificationmethods for the 8x5 notification profile."
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
   end
   newproperty(:notificationmethods24x7, :array_matching => :all) do
     desc "An array of notificationmethods for the 24x7 notification profile."
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
@@ -81,12 +83,14 @@ Puppet::Type.newtype(:opsview_contact) do
   # Hostgroups
   newproperty(:hostgroups8x5, :array_matching => :all) do
     desc "An array of hostgroups for the 8x5 notification profile."
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
   end
   newproperty(:hostgroups24x7, :array_matching => :all) do
     desc "An array of hostgroups for the 24x7 notification profile."
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
@@ -118,12 +122,14 @@ Puppet::Type.newtype(:opsview_contact) do
   # Servicegroups
   newproperty(:servicegroups8x5, :array_matching => :all) do
     desc "An array of servicegroups for the 8x5 notification profile."
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
   end
   newproperty(:servicegroups24x7, :array_matching => :all) do
     desc "An array of servicegroups for the 24x7 notification profile."
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
