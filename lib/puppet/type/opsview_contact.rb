@@ -57,13 +57,21 @@ Puppet::Type.newtype(:opsview_contact) do
   newproperty(:notificationmethods8x5, :array_matching => :all) do
     desc "An array of notificationmethods for the 8x5 notification profile."
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   newproperty(:notificationmethods24x7, :array_matching => :all) do
     desc "An array of notificationmethods for the 24x7 notification profile."
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   newproperty(:service_notification_options8x5) do
@@ -82,13 +90,21 @@ Puppet::Type.newtype(:opsview_contact) do
   newproperty(:hostgroups8x5, :array_matching => :all) do
     desc "An array of hostgroups for the 8x5 notification profile."
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   newproperty(:hostgroups24x7, :array_matching => :all) do
     desc "An array of hostgroups for the 24x7 notification profile."
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   newproperty(:allhostgroups8x5, :boolean => true) do
@@ -119,13 +135,21 @@ Puppet::Type.newtype(:opsview_contact) do
   newproperty(:servicegroups8x5, :array_matching => :all) do
     desc "An array of servicegroups for the 8x5 notification profile."
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   newproperty(:servicegroups24x7, :array_matching => :all) do
     desc "An array of servicegroups for the 24x7 notification profile."
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   newproperty(:allservicegroups8x5, :boolean => true) do

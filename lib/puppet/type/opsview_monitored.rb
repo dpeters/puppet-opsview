@@ -22,21 +22,33 @@ Puppet::Type.newtype(:opsview_monitored) do
   newproperty(:hosttemplates, :array_matching => :all) do
     desc "Array of Opsview host templates that should be applied to this node"
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
 
   newproperty(:servicechecks, :array_matching => :all) do
     desc "Array of Opsview service checks that should be applied to this node"
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   
   newproperty(:keywords, :array_matching => :all) do
     desc "Array of Opsview keywords should be applied to this node"
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   
@@ -51,7 +63,11 @@ Puppet::Type.newtype(:opsview_monitored) do
   newproperty(:parents, :array_matching => :all) do
     desc "Array of parents for this node"
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
 
@@ -158,7 +174,11 @@ Puppet::Type.newtype(:opsview_monitored) do
     end
 
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
 
