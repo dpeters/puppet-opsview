@@ -28,8 +28,13 @@ Puppet::Type.newtype(:opsview_hosttemplate) do
 
   newproperty(:managementurls, :array_matching => :all) do
     desc "Array of management urls for this hosttemplate"
+    defaultto []                                                                                                                                                                                               
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is - @should == @should - is
+      else
+        is == @should
+      end
     end
   end
   
