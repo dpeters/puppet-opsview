@@ -44,18 +44,20 @@ Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Pr
   mk_resource_methods
 
   def self.hosttemplate_map(hosttemplate)
-    p = { :name          => hosttemplate["name"],
-          :hosttemplate  => hosttemplate["name"],
-          :description   => hosttemplate["description"],
-          :servicechecks => hosttemplate["servicechecks"].collect { |sc| sc["name"] },
-          :full_json     => hosttemplate,
-          :ensure        => :present }
+    p = { :name           => hosttemplate["name"],
+          :hosttemplate   => hosttemplate["name"],
+          :description    => hosttemplate["description"],
+          :servicechecks  => hosttemplate["servicechecks"].collect { |sc| sc["name"] },
+          # managementurls as read from Opsview is a list of hashes, where each hash
+          # has "name" and "url" key. Assign this list directly to :managementurls
+          :managementurls => hosttemplate["managementurls"],
+          :full_json      => hosttemplate,
+          :ensure         => :present }
 
-    # optional properties
-    if defined? hosttemplate["managementurls"]
-      p[:managementurls] = hosttemplate["managementurls"].collect { |mu| mu["name"] }
-    end
+    # Process optional properties here
+
     p
+
   end
 
   # Query the current resource state from Opsview
@@ -100,8 +102,15 @@ Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Pr
       end
     end
 
-    if not @property_hash["managementurls"].to_s.empty?
-      @updated_json["managementurls"]["name"] = @property_hash[:managementurls]
+    # If managementurls are set in the manifest update the JSON content for the
+    # managementurls object with a list of hashes where each hash has a "name"
+    # and an "url" key.
+    if not @property_hash[:managementurls].empty?
+      @property_hash[:managementurls].each do |mu|
+        @updated_json["managementurls"] << { "name" => mu["name"], "url" => mu["url"] }
+      end
+    else
+      @updated_json["managementurls"] = []
     end
   
     # Flush changes:
@@ -185,12 +194,7 @@ Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Pr
               "timed_exception" : null
            }
         ],
-        "managementurls" : [
-           {
-              "name" : "ssh",
-              "url" : "ssh://$HOSTADDRESS$"
-           }
-        ]
+        "managementurls" : []
      }'
 
     JSON.parse(json.to_s)

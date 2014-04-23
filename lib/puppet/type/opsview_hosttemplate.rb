@@ -21,21 +21,17 @@ Puppet::Type.newtype(:opsview_hosttemplate) do
   
   newproperty(:servicechecks, :array_matching => :all) do
     desc "Array of servicechecks for this hosttemplate."
-    defaultto []
     def insync?(is)
-      if is.is_a?(Array) and @should.is_a?(Array)
-        is.sort == @should.sort
-      else
-        is == @should
-      end
+      is.sort == should.sort
     end
   end
 
   newproperty(:managementurls, :array_matching => :all) do
     desc "Array of management urls for this hosttemplate"
+    defaultto []                                                                                                                                                                                               
     def insync?(is)
       if is.is_a?(Array) and @should.is_a?(Array)
-        is.sort == @should.sort
+        is - @should == @should - is
       else
         is == @should
       end
