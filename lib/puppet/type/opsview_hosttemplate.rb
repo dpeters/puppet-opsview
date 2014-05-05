@@ -21,6 +21,7 @@ Puppet::Type.newtype(:opsview_hosttemplate) do
   
   newproperty(:servicechecks, :array_matching => :all) do
     desc "Array of servicechecks for this hosttemplate."
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end

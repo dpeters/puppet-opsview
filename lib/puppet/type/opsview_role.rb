@@ -57,24 +57,28 @@ Puppet::Type.newtype(:opsview_role) do
   end
   newproperty(:access_hostgroups, :array_matching => :all) do
     desc "Array of hostgroups that this role can access."
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
   end
   newproperty(:access_servicegroups, :array_matching => :all) do
     desc "Array of servicegroups that this role can access."
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
   end
   newproperty(:access_keywords, :array_matching => :all) do
     desc "Array of keywords that this role can access."
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
   end
   newproperty(:accesses, :array_matching => :all) do
     desc "Array of access properties defined for this role."
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
@@ -82,6 +86,7 @@ Puppet::Type.newtype(:opsview_role) do
   newproperty(:hostgroups, :array_matching => :all) do
     desc "Array of hostgroups that this role can configure, if CONFIGUREHOSTS
       is defined in accesses."
+    defaultto []
     def insync?(is)
       is.sort == should.sort
     end
