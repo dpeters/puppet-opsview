@@ -21,14 +21,22 @@ Puppet::Type.newtype(:opsview_servicecheck) do
     desc "Array of dependencies for this servicecheck"
     defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   newproperty(:keywords, :array_matching => :all) do
     desc "Array of keywords for this servicecheck"
     defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   

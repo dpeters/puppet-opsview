@@ -59,28 +59,44 @@ Puppet::Type.newtype(:opsview_role) do
     desc "Array of hostgroups that this role can access."
     defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   newproperty(:access_servicegroups, :array_matching => :all) do
     desc "Array of servicegroups that this role can access."
     defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   newproperty(:access_keywords, :array_matching => :all) do
     desc "Array of keywords that this role can access."
     defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   newproperty(:accesses, :array_matching => :all) do
     desc "Array of access properties defined for this role."
     defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   newproperty(:hostgroups, :array_matching => :all) do
@@ -88,7 +104,11 @@ Puppet::Type.newtype(:opsview_role) do
       is defined in accesses."
     defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
 end

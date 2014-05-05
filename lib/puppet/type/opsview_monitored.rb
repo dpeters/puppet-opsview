@@ -23,7 +23,11 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "Array of Opsview host templates that should be applied to this node"
     defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
 
@@ -31,7 +35,11 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "Array of Opsview service checks that should be applied to this node"
     defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   
@@ -39,7 +47,11 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "Array of Opsview keywords should be applied to this node"
     defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   
@@ -56,7 +68,11 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "Array of parents for this node"
     defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
 
@@ -164,7 +180,11 @@ Puppet::Type.newtype(:opsview_monitored) do
     end
 
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
 

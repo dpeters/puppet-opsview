@@ -50,21 +50,33 @@ Puppet::Type.newtype(:opsview_keyword) do
     desc "Array of hosts to apply this keyword to"
     defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   newproperty(:servicechecks, :array_matching => :all) do
     desc "Array of servicechecks to apply this keyword to"
     defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   newproperty(:roles, :array_matching => :all) do
     desc "Array of roles which can view this keyword"
     defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
   
