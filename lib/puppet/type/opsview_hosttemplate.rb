@@ -5,24 +5,29 @@ Puppet::Type.newtype(:opsview_hosttemplate) do
 
   newparam(:name, :namevar => true) do
   end
-  
+
   newparam(:reload_opsview) do
     desc "True if you want an Opsview reload to be performed when the hosttemplate is updated"
     defaultto :false
   end
-  
+
   newproperty(:hosttemplate) do
     desc "This hosttemplate"
   end
-  
+
   newproperty(:description) do
     desc "description for this hosttemplate"
   end
-  
+
   newproperty(:servicechecks, :array_matching => :all) do
     desc "Array of servicechecks for this hosttemplate."
+    defaultto []
     def insync?(is)
-      is.sort == should.sort
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
     end
   end
 
@@ -31,15 +36,15 @@ Puppet::Type.newtype(:opsview_hosttemplate) do
     defaultto []
     def insync?(is)
       if is.is_a?(Array) and @should.is_a?(Array)
-        is - @should == @should - is
+        is.sort == @should.sort
       else
         is == @should
       end
     end
   end
-  
+
   autorequire(:opsview_servicecheck) do
     self[:servicechecks]
   end
-  
+
 end
